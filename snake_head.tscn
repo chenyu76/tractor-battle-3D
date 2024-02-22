@@ -1,0 +1,62 @@
+[gd_scene load_steps=6 format=3 uid="uid://bxs0v4uv701sj"]
+
+[ext_resource type="Script" path="res://snake_head.gd" id="1_cj73a"]
+[ext_resource type="PackedScene" uid="uid://bffpm7mu2kwt5" path="res://snake_body.tscn" id="2_v7qtp"]
+[ext_resource type="ArrayMesh" uid="uid://kga8ujyjv8h2" path="res://art/tractor.obj" id="3_elsiu"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7ctnb"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b7mrp"]
+size = Vector3(0.9, 0.5, 0.5)
+
+[node name="SnakeHead" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 13
+script = ExtResource("1_cj73a")
+snake_body_scene = ExtResource("2_v7qtp")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_7ctnb")
+
+[node name="pivot" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="pivot"]
+transform = Transform3D(0.3, 0, 0, 0, 0.3, 0, 0, 0, 0.3, -0.095, -0.903587, 0.498579)
+mesh = ExtResource("3_elsiu")
+skeleton = NodePath("../..")
+
+[node name="collisionDetector" type="Area3D" parent="pivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.248, -0.522)
+collision_layer = 2
+collision_mask = 13
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pivot/collisionDetector"]
+shape = SubResource("BoxShape3D_b7mrp")
+
+[node name="VisibleOnScreenNotifier3D" type="VisibleOnScreenNotifier3D" parent="pivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.207544)
+aabb = AABB(-0.63, -1, -1.2, 1.225, 1.505, 2.09)
+
+[node name="powerGenerator" type="Timer" parent="."]
+wait_time = 0.1
+autostart = true
+
+[node name="doubleClickTimer" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true
+
+[node name="input_interval" type="Timer" parent="."]
+wait_time = 0.1
+one_shot = true
+
+[node name="speedUpTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+
+[connection signal="body_entered" from="pivot/collisionDetector" to="." method="_on_collision_detector_body_entered"]
+[connection signal="screen_exited" from="pivot/VisibleOnScreenNotifier3D" to="." method="_on_visible_on_screen_notifier_3d_screen_exited"]
+[connection signal="timeout" from="powerGenerator" to="." method="_on_power_generator_timeout"]
+[connection signal="timeout" from="doubleClickTimer" to="." method="_on_double_click_timer_timeout"]
+[connection signal="timeout" from="input_interval" to="." method="_on_input_interval_timeout"]
+[connection signal="timeout" from="speedUpTimer" to="." method="_on_speed_up_timer_timeout"]

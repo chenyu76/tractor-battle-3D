@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://c3x4q6qxor1xo"
+path="res://.godot/imported/snakehead.obj-85d472d6a613279b381d1d76c4863494.mesh"
+
+[deps]
+
+files=["res://.godot/imported/snakehead.obj-85d472d6a613279b381d1d76c4863494.mesh"]
+
+source_file="res://art/snakehead.obj"
+dest_files=["res://.godot/imported/snakehead.obj-85d472d6a613279b381d1d76c4863494.mesh", "res://.godot/imported/snakehead.obj-85d472d6a613279b381d1d76c4863494.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

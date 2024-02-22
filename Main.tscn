@@ -1,0 +1,76 @@
+[gd_scene load_steps=11 format=3 uid="uid://ceqkw2hoc4w88"]
+
+[ext_resource type="Script" path="res://Main.gd" id="1_3wfpj"]
+[ext_resource type="PackedScene" uid="uid://bxs0v4uv701sj" path="res://snake_head.tscn" id="2_sxenw"]
+[ext_resource type="PackedScene" uid="uid://vfkl8fhiyuha" path="res://snake_status.tscn" id="3_8pgk1"]
+[ext_resource type="ArrayMesh" uid="uid://dpl1p0qgo4pd0" path="res://art/you_lose.obj" id="4_nm8mx"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jyof0"]
+size = Vector3(60, 1, 60)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iyjse"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_mmdct"]
+material = SubResource("StandardMaterial3D_iyjse")
+size = Vector3(60, 1, 60)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ilmhb"]
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8n0hv"]
+material = SubResource("StandardMaterial3D_ilmhb")
+size = Vector3(200, 1, 150)
+
+[sub_resource type="TextMesh" id="TextMesh_mxi6p"]
+text = "0"
+
+[node name="Main" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+script = ExtResource("1_3wfpj")
+snake_head_scene = ExtResource("2_sxenw")
+snake_status_scene = ExtResource("3_8pgk1")
+
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_jyof0")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_mmdct")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.0485709, 0.99882, 0, -0.99882, -0.0485709, 0, 25.7317, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 250.0
+
+[node name="Marker3D" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.139173, 0.990268, 0, -0.990268, 0.139173, 0, 127, 19.105)
+
+[node name="Camera" type="Camera3D" parent="Marker3D"]
+transform = Transform3D(1, 0, 0, 0, 1, -5.96046e-08, 0, 5.96046e-08, 1, 0, 0, 0)
+fov = 27.0
+size = 20.0
+
+[node name="bottomGround" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.88542, 0)
+mesh = SubResource("BoxMesh_8n0hv")
+skeleton = NodePath("")
+
+[node name="loseAniTimer" type="Timer" parent="."]
+wait_time = 20.0
+one_shot = true
+
+[node name="losePivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.714785, 0)
+
+[node name="lose" type="MeshInstance3D" parent="losePivot"]
+mesh = ExtResource("4_nm8mx")
+skeleton = NodePath("../..")
+
+[node name="loseMusic" type="AudioStreamPlayer" parent="."]
+
+[node name="test" type="MeshInstance3D" parent="."]
+mesh = SubResource("TextMesh_mxi6p")
+skeleton = NodePath("../Ground/MeshInstance3D")
+
+[connection signal="timeout" from="loseAniTimer" to="." method="_on_lose_ani_timer_timeout"]

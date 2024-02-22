@@ -1,0 +1,39 @@
+[gd_scene load_steps=4 format=3 uid="uid://bouyodfkcwtp"]
+
+[ext_resource type="Script" path="res://start.gd" id="1_v5wud"]
+
+[sub_resource type="InputEventAction" id="InputEventAction_rqh6d"]
+action = &"r"
+
+[sub_resource type="Shortcut" id="Shortcut_5ucek"]
+events = [SubResource("InputEventAction_rqh6d")]
+
+[node name="Start" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1152.0
+offset_bottom = -648.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_v5wud")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+offset_right = 1153.0
+offset_bottom = 645.0
+
+[node name="Button" type="Button" parent="CenterContainer"]
+layout_mode = 2
+shortcut = SubResource("Shortcut_5ucek")
+text = "Tractor Battle 3D
+
+Press R to start
+
+Help
+P1: WASD + K
+P2: ↑↓←→ + Space
+double tap to dash"
+
+[connection signal="pressed" from="CenterContainer/Button" to="." method="_on_button_pressed"]

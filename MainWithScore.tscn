@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://behxnjt2rsrub"]
+
+[ext_resource type="Script" path="res://MainWithScore.gd" id="1_xhq1r"]
+[ext_resource type="PackedScene" uid="uid://ceqkw2hoc4w88" path="res://Main.tscn" id="2_bms0n"]
+
+[node name="MainWithScore" type="Node3D"]
+script = ExtResource("1_xhq1r")
+main_scene = ExtResource("2_bms0n")
