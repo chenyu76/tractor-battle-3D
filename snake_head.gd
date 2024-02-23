@@ -1,8 +1,10 @@
 extends CharacterBody3D
 
-
+# 蛇的速度
 @export var speed = 20
+# 蛇的跳跃高度
 @export var jump_impulse = 8
+# 蛇的重力加速度
 @export var fall_acceleration = 20
 
 @export var snake_body_scene: PackedScene
@@ -11,7 +13,7 @@ extends CharacterBody3D
 var snake_length = 5000
 # 蛇的移动方向
 var now_direction = Vector3.FORWARD
-# 蛇的头朝向的方向
+# 蛇的头朝向的方向，由于动画需要，head_direction不会渐变
 var head_direction = Vector3.FORWARD
 # 蛇竖直方向的旋转
 var rotation_x = 0
@@ -22,7 +24,6 @@ var allow_key_input = true
 
 # 蛇的颜色
 var snake_material
-#var snake_eyes_material = load("res://art/snake_eyes_material.tres")
 
 # 撞到东西死了（要表明死的哪条蛇），以及广播死亡位置，播放结算动画
 signal hit(snake, positio)
@@ -194,7 +195,7 @@ func _on_input_interval_timeout():
 	allow_key_input = true
 
 
-func _on_collision_detector_body_entered(body):
+func _on_collision_detector_body_entered(_body):
 	die()
 
 func _on_visible_on_screen_notifier_3d_screen_exited():

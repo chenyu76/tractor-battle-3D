@@ -73,6 +73,7 @@ func start_game():
 		snakes[i].update_power_info.connect(infos[i].show_power.bind())
 		snakes[i].hit.connect(snake_die.bind())
 
+# 蛇死亡
 func snake_die(id, snake_position):
 	if !game_ended:
 		game_ended = true
