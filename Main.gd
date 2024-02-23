@@ -8,7 +8,9 @@ signal restart(id)
 
 # 游戏是否结束
 var game_ended = false
+# 败者的id
 var loser
+# 败者死亡时的位置
 var loser_position
 # 结算时旋转的朝向方向
 var forward_vector = -transform.basis.y
@@ -55,15 +57,8 @@ func _physics_process(delta):
 			$Marker3D/Camera.fov += 3 * delta
 			
 		if Input.is_action_just_pressed("r"):
+			# 发送重启信号到MainWithScore
 			restart.emit(loser)
-			#clear_game()
-			#start_game()
-
-# 重置游戏。已弃用，还是重置场景简单点
-func clear_game():
-	for i in range(player_num):
-		snakes[i].queue_free()
-		infos[i].queue_free()
 
 # 将蛇节点添加到子节点，开始游戏
 func start_game():
