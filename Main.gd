@@ -19,8 +19,7 @@ var ended_ani = false
 
 # 玩家数量信息
 var player_num = 2
-	
-# 蛇
+# 用于存储实例化的蛇
 var snakes = []
 # 蛇的能量条
 var infos = []
