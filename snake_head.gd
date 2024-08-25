@@ -4,8 +4,9 @@ extends CharacterBody3D
 @export var speed = 20
 # 蛇的跳跃高度
 @export var jump_impulse = 8
-# 蛇的重力加速度
-@export var fall_acceleration = 20
+# 蛇的（默认/计算时使用的）重力加速度
+@export var default_fall_acceleration = 20
+var fall_acceleration = default_fall_acceleration
 
 @export var snake_body_scene: PackedScene
 
@@ -62,6 +63,12 @@ var speed_multiplier = 1
 # 加速时使用的螺旋动画变量
 var speed_up_ani_angle = 0.0
 
+# (默认及使用的)获得/丢失能量的速度，在移动到屏幕外时会变为负数
+@export var default_power_generate_speed = 0.25
+var power_generate_speed = default_power_generate_speed
+
+var fly_mode = false
+
 func _ready():
 	curve_path = Curve3D.new()
 	mesh_instance = MeshInstance3D.new()
@@ -75,7 +82,8 @@ func _ready():
 
 func initialize(id_t, 
 		snake_material_t = load("res://art/snake_material_1.tres"), 
-		key_set_t = ["up1", "down1", "left1", "right1", "jump1"]):
+		key_set_t = ["up1", "down1", "left1", "right1", "jump1"],
+		extra_mode = []):
 	snake_material = snake_material_t
 	key_set = key_set_t
 	id = id_t
@@ -87,6 +95,14 @@ func initialize(id_t,
 	#$generateBodyTimer.start()
 	$input_interval.wait_time = 1.0 / speed
 	
+	# 处理其他玩法
+	if 'fly' in extra_mode:
+		fly_mode = true
+		fall_acceleration = 0
+		velocity = Vector3(0, speed, 10)
+	else:
+		fall_acceleration = default_fall_acceleration
+	
 func _physics_process(delta):
 	if position.y <= -10:
 		die()
@@ -97,71 +113,98 @@ func _physics_process(delta):
 	target_velocity.x = 0
 	target_velocity.z = 0
 	
-	# 改变方向
-	if allow_key_input:
+	# 根据使用模式的不同使用不同的变向策略
+	if fly_mode:
+		direction = velocity
 		if Input.is_action_pressed(key_set[0]):
-			direction.z -= 1
+			direction += Vector3.UP.cross(velocity).cross(velocity).normalized()
 		if Input.is_action_pressed(key_set[1]):
-			direction.z += 1
+			direction -= Vector3.UP.cross(velocity).cross(velocity).normalized()
 		if Input.is_action_pressed(key_set[2]):
-			direction.x -= 1
+			direction -= Vector3.UP.cross(velocity).cross(velocity).cross(velocity).normalized()
 		if Input.is_action_pressed(key_set[3]):
-			direction.x += 1
+			direction += Vector3.UP.cross(velocity).cross(velocity).cross(velocity).normalized()
+		if direction != velocity:
+
+			velocity = direction.normalized() * speed
+			now_direction = direction.normalized()
+			head_direction = direction.normalized()
 			
-		# 输入的方向需要不是反方向
-		if direction != Vector3.ZERO and direction.dot(now_direction) >= -0.1:
-			allow_key_input = false
-			$input_interval.start()
-			
-			direction = direction.normalized()
-			
-			# 在没有加速时，渲染几个身体外观，使过渡圆滑
-			if speed_multiplier == 1:
-				# 过渡数量
-				var num = 5
-				for i in range(num):
-					build_snake_body(( (direction * i + now_direction * (num - 1 - i) ) 
-										+ Vector3(0, sin(rotation_x), 0)).normalized())
+			$pivot.look_at_from_position(position, position + head_direction, Vector3.UP)
+		#print(velocity)
+
+	else:
+		# 不是飞行模式，使用正常玩法
+		# 改变方向
+		if allow_key_input:
+			if Input.is_action_pressed(key_set[0]):
+				direction.z -= 1
+			if Input.is_action_pressed(key_set[1]):
+				direction.z += 1
+			if Input.is_action_pressed(key_set[2]):
+				direction.x -= 1
+			if Input.is_action_pressed(key_set[3]):
+				direction.x += 1
 				
-			now_direction = direction
-			
-	# 双击按键加速
-	for i in range(4):
-		if double_click_status == 0 and Input.is_action_just_pressed(key_set[i]):
-			double_click_button = i
-			double_click_status = 1
-			break
-	if double_click_status == 1 and Input.is_action_just_released(key_set[double_click_button]):
-		double_click_status = 2
-		$doubleClickTimer.start()
-	if double_click_status == 2 and Input.is_action_just_pressed(key_set[double_click_button]) \
-			and power > power_needed_to_speed_up and speed_multiplier == 1:
-		speed_multiplier = 2
-		double_click_status = 0
-		$speedUpTimer.start()
-		power -= power_needed_to_speed_up
-			
-	# Ground Velocity
-	target_velocity.x = now_direction.x * speed * speed_multiplier
-	target_velocity.z = now_direction.z * speed * speed_multiplier
-	
-	# Vertical Velocity
-	if not is_on_floor(): # If in the air, fall towards the floor. Literally gravity
-		target_velocity.y -= (fall_acceleration * delta)
-		# print("v:" + str(target_velocity) + "\t l:" + str(position)) 
+			# 输入的方向需要不是反方向
+			if direction != Vector3.ZERO and direction.dot(now_direction) >= -0.1:
+				allow_key_input = false
+				$input_interval.start()
+				
+				direction = direction.normalized()
+				
+				# 在没有加速时，渲染几个身体外观，使过渡圆滑
+				if speed_multiplier == 1:
+					# 过渡数量
+					var num = 5
+					for i in range(num):
+						build_snake_body(( (direction * i + now_direction * (num - 1 - i) ) 
+											+ Vector3(0, sin(rotation_x), 0)).normalized())
+					
+				now_direction = direction
+				
+		# 双击按键加速
+		for i in range(4):
+			if double_click_status == 0 and Input.is_action_just_pressed(key_set[i]):
+				double_click_button = i
+				double_click_status = 1
+				break
+		if double_click_status == 1 and Input.is_action_just_released(key_set[double_click_button]):
+			double_click_status = 2
+			$doubleClickTimer.start()
+		if double_click_status == 2 and Input.is_action_just_pressed(key_set[double_click_button]) \
+				and power > power_needed_to_speed_up and speed_multiplier == 1:
+			speed_multiplier = 2
+			double_click_status = 0
+			$speedUpTimer.start()
+			power -= power_needed_to_speed_up
+				
+		# Ground Velocity
+		target_velocity.x = now_direction.x * speed * speed_multiplier
+		target_velocity.z = now_direction.z * speed * speed_multiplier
 		
-	# Jumping. 需要power_needed_to_jump点能量
-	if power > power_needed_to_jump and Input.is_action_just_pressed(key_set[4]) and is_on_floor(): 
-			target_velocity.y = jump_impulse
-			power -= power_needed_to_jump
-	
-	#if Input.is_action_pressed(key_set[4]) and target_velocity.y > 0 and not is_on_floor(): 
-		#target_velocity.y = 3 * jump_impulse
-	
-	# 竖直方向上的旋转
-	rotation_x = max(-PI*2/5, PI / 4 * velocity.y / jump_impulse)
-	
-	velocity = target_velocity
+		# Vertical Velocity
+		if not is_on_floor(): # If in the air, fall towards the floor. Literally gravity
+			target_velocity.y -= (fall_acceleration * delta)
+			# print("v:" + str(target_velocity) + "\t l:" + str(position)) 
+			
+		# 跳跃 Jumping. 需要power_needed_to_jump点能量
+		if power > power_needed_to_jump and Input.is_action_just_pressed(key_set[4]) and is_on_floor(): 
+				target_velocity.y = jump_impulse if speed_multiplier==1 else 2*jump_impulse
+				power -= power_needed_to_jump
+		
+		#if Input.is_action_pressed(key_set[4]) and target_velocity.y > 0 and not is_on_floor(): 
+			#target_velocity.y = 3 * jump_impulse
+		
+		# 竖直方向上的旋转
+		rotation_x = max(-PI*2/5, PI / 4 * velocity.y / jump_impulse)
+		
+		velocity = target_velocity
+		
+		head_direction = (2 * head_direction + now_direction).normalized()
+		$pivot.look_at_from_position(position, position + head_direction, Vector3.UP)
+		$pivot.rotation.x = rotation_x
+		
 	move_and_slide()
 	
 	# 创建新的身体碰撞箱
@@ -171,10 +214,6 @@ func _physics_process(delta):
 	# 创建新的蛇身点
 	# 创建新身体渲染
 	build_snake_body((now_direction + Vector3(0, sin(rotation_x), 0)).normalized())
-	
-	head_direction = (2 * head_direction + now_direction).normalized()
-	$pivot.look_at_from_position(position, position + head_direction, Vector3.UP)
-	$pivot.rotation.x = rotation_x
 	
 
 # 创建新的身体箱
@@ -186,7 +225,7 @@ func generate_body():
 	body.position = self.position
 	#mob.squashed.connect($UserInterface/ScoreLabel._on_mob_squashed.bind())
 	hit.connect(body._on_snake_head_hit.bind())
-	await get_tree().create_timer(1.0 / speed).timeout
+	await get_tree().create_timer(1.5 / speed).timeout
 	
 	add_sibling(body)
 
@@ -199,8 +238,12 @@ func _on_collision_detector_body_entered(_body):
 	die()
 
 func _on_visible_on_screen_notifier_3d_screen_exited():
-	#die()
-	pass
+	#print("离开屏幕")
+	power_generate_speed = -8 * default_power_generate_speed
+	
+func _on_visible_on_screen_notifier_3d_screen_entered():
+	power_generate_speed = default_power_generate_speed
+
 	
 func die():
 	#$pivot/collisionDetector/CollisionShape3D.disabled = true
@@ -215,11 +258,16 @@ func die():
 
 
 func _on_power_generator_timeout():
-	if power < 99.9:
-		power += 0.25
+	if power < 99.9 or power_generate_speed < 0:
+		power += power_generate_speed
 		if power > 100:
 			power = 100
 	update_power_info.emit(power)
+	
+	# 当能量为负数时死亡
+	if power < -0.5:
+		#print("死于出界")
+		die()
 		
 func create_square_at_point(point_position: Vector3, direction: Vector3, size: float) -> Array:
 	var vertices2 = []

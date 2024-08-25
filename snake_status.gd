@@ -3,7 +3,7 @@ extends Node3D
 # 玩家id,只能接受来自符合id的信号
 var id = -1
 
-const total_bar_length = 25
+const total_bar_length = 20
 const total_power = 100.0
 
 

@@ -55,6 +55,7 @@ wait_time = 2.0
 one_shot = true
 
 [connection signal="body_entered" from="pivot/collisionDetector" to="." method="_on_collision_detector_body_entered"]
+[connection signal="screen_entered" from="pivot/VisibleOnScreenNotifier3D" to="." method="_on_visible_on_screen_notifier_3d_screen_entered"]
 [connection signal="screen_exited" from="pivot/VisibleOnScreenNotifier3D" to="." method="_on_visible_on_screen_notifier_3d_screen_exited"]
 [connection signal="timeout" from="powerGenerator" to="." method="_on_power_generator_timeout"]
 [connection signal="timeout" from="doubleClickTimer" to="." method="_on_double_click_timer_timeout"]

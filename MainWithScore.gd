@@ -1,7 +1,7 @@
 extends Node3D
 
-# 玩家数量信息
-var player_num = 2
+# 玩家数量信息，会从main.gd里同步
+var player_num = 0
 
 # 每个玩家的得分，需要初始化为零
 var score = []
@@ -20,7 +20,7 @@ func _ready():
 		score.push_back(0)
 		# 创建分数文本mesh
 		score_label.push_back(MeshInstance3D.new())
-		score_label[i].position = Main.status_positions[i] + Vector3(0,0,15)
+		score_label[i].position = Main.status_positions[i] + Vector3(0,0,12)
 		score_label[i].rotation.x = -PI/2
 		score_label[i].mesh = TextMesh.new()
 		score_label[i].mesh.text = "0"
@@ -31,7 +31,7 @@ func _ready():
 		
 		# 创建score字样mesh
 		var score_text = MeshInstance3D.new()
-		score_text.position = Main.status_positions[i] + Vector3(0,0,17)
+		score_text.position = Main.status_positions[i] + Vector3(0,0,14)
 		score_text.rotation.x = -PI/2
 		score_text.mesh = TextMesh.new()
 		score_text.mesh.text = "Score"
@@ -55,6 +55,7 @@ func _on_main_restart(id):
 	
 func start_main_scene():
 	Main = main_scene.instantiate()
+	player_num = Main.player_num
 	add_child(Main)
 	Main.restart.connect(_on_main_restart.bind())
 	

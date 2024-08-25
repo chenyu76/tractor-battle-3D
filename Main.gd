@@ -18,17 +18,26 @@ var forward_vector = -transform.basis.y
 var ended_ani = false
 
 # 玩家数量信息
-var player_num = 2
+var player_num = 1
 # 用于存储实例化的蛇
 var snakes = []
 # 蛇的能量条
 var infos = []
 # 蛇的材质
 var sms = [load("res://art/snake_material_1.tres"),
-			load("res://art/snake_material_2.tres")]
+			load("res://art/snake_material_2.tres"),
+			load("res://art/snake_material_3.tres"),
+			load("res://art/snake_material_3.tres")]
 # 键位
 var key_sets = [["w", "s", "a", "d", "k"], 
+				["up1", "down1", "left1", "right1", "jump1"],
+				["up1", "down1", "left1", "right1", "jump1"],
+				["up1", "down1", "left1", "right1", "jump1"],
 				["up1", "down1", "left1", "right1", "jump1"]]
+				
+# 额外的模式，目前只有飞行，而且没做完
+#var extra_mode = ["fly"]
+var extra_mode = []
 				
 var snake_positions = build_snake_position(player_num)
 var status_positions = build_snake_status_position(player_num)
@@ -43,6 +52,7 @@ func _ready():
 	start_game()
 	
 func _physics_process(delta):
+	
 	if game_ended:
 		if !ended_ani:
 			var target_p = loser_position + Vector3(0,3,0)
@@ -63,7 +73,7 @@ func _physics_process(delta):
 func start_game():
 	for i in range(player_num):
 		snakes[i].position = snake_positions[i]
-		snakes[i].initialize(i, sms[i], key_sets[i])
+		snakes[i].initialize(i, sms[i], key_sets[i], extra_mode)
 		add_child(snakes[i])
 		
 		infos[i].position = status_positions[i]
@@ -102,12 +112,22 @@ func build_snake_position(num):
 # 输入snake数量，返回每个snake的状态栏应该放哪的vector3 array
 func build_snake_status_position(num):
 	var array = []
+	var pos = []
+	var h = 13
+	if num == 1:
+		pos = [0]
+	elif num == 2:
+		pos = [0, 0]
+	elif num == 3:
+		pos = [h, 0, -h]
+	elif num == 4: 
+		pos = [h, h, -h, -h]
 	array.resize(num)
 	for i in range(num):
 		var l_r = 40
 		if i%2 == 0:
 			l_r = -40
-		array[i] = Vector3(l_r, 0, 0)
+		array[i] = Vector3(l_r, 0, pos[i])
 	return array
 
 
