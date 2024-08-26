@@ -1,7 +1,7 @@
 extends RigidBody3D
 
-signal waitingDie
-signal waitingCollisionShape
+#signal waitingDie
+#signal waitingCollisionShape
 
 var is_snake_tail = 0
 
@@ -20,7 +20,7 @@ func initialize(id_t, direction, rotation_x, snake_length):
 	id = id_t
 
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	if is_snake_tail:
 		queue_free()
 
@@ -34,7 +34,7 @@ func _on_die_timer_timeout():
 	is_snake_tail = true
 	$CollisionShape3D.disabled = true
 	
-func _on_snake_head_hit(id_t, posi):
+func _on_snake_head_hit(id_t, _posi):
 	if id == id_t:
 		pass
 		#queue_free()

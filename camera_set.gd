@@ -10,8 +10,7 @@ var players_cam = []
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# 将重玩信号连接到相机
-	$MainWithScore.restart_game.connect(bind_camera.bind())
-	$MainWithScore.restart_game.connect(_on_window_size_changed.bind())
+	$MainWithScore.restart_game.connect(restart.bind())
 	
 	# 检查有几个玩家
 	player_num = Config.player_num
@@ -19,17 +18,30 @@ func _ready() -> void:
 	if "fpv" in Config.extra_mode:
 		fpv_mode = true
 		players_cam.resize(player_num)
+		# 添加视角
 		for i in range(player_num):
 			players_cam[i] = TextureRect.new()
 			add_child(players_cam[i])
-			# players_cam[i].position = Vector2.ZERO
-			# print(players_cam[i].position)
+			players_cam[i].visible = true
 	
 	get_window().size_changed.connect(_on_window_size_changed.bind())
 	bind_camera()
 	_on_window_size_changed()
 	
-
+func restart():
+	fpv_mode = "fpv" in Config.extra_mode
+	bind_camera()
+	rechange_view()
+	_on_window_size_changed()
+	
+func rechange_view():
+	# 检查是否需要第一人称视角
+	if fpv_mode:
+		for i in players_cam:
+			i.visible = true
+	else:
+		for i in players_cam:
+			i.visible = false
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

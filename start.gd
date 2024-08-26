@@ -67,9 +67,7 @@ func playerKeyset(num):
 	var keyCtrl = $Container/playerKeyContainer
 	for child in keyCtrl.get_children():
 		keyCtrl.remove_child(child)
-	var keys_array = []
-	for v in Config.avail_keyset.values():
-		keys_array.append(v)
+	var keys_array = Config.avail_keyset.values()
 	for i in range(num):
 		var container = HBoxContainer.new()
 		var label = Label.new()
@@ -89,3 +87,14 @@ func playerKeyset(num):
 		container.add_child(option)
 		keyCtrl.add_child(container)
 	
+
+
+func _on_random_mode_button_toggled(toggled_on: bool) -> void:
+	if toggled_on:
+		$Container/ModeSelctLabel.visible = false
+		$Container/eModeContainer.visible = false
+		Config.random_extra_mode = true
+	else:
+		$Container/ModeSelctLabel.visible = true
+		$Container/eModeContainer.visible = true
+		Config.random_extra_mode = false

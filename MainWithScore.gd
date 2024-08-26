@@ -64,6 +64,8 @@ func _on_main_restart(id):
 	restart_game.emit()
 	
 func start_main_scene():
+	if Config.random_extra_mode:
+		random_extra_mode()
 	Main = main_scene.instantiate()
 	player_num = Main.player_num
 	die_players = []
@@ -84,3 +86,13 @@ func update_score(id, _pos=Vector3.ZERO):
 				score[i] += 1
 				score_label[i].mesh.text = str(score[i])
 				print("\tplayer "+str(i) + " score: " + str(score[i]))
+
+func random_extra_mode():
+	var exnum = randi() % len(Config.avail_mode)
+	var values_array = Config.avail_mode.values()
+	Config.extra_mode = []
+	while Config.extra_mode.size() < exnum:
+		var random_value = values_array[randi() % values_array.size()]
+		if not random_value in Config.extra_mode:
+			Config.extra_mode.append(random_value)
+		

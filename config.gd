@@ -16,6 +16,8 @@ var key_sets = []
 # 模式：fly：飞行
 # 模式：fpv：玩家的第一人称视角
 var extra_mode = []
+# 是否随机抽取额外模式游玩
+var random_extra_mode = false
 
 # 可用的额外模式，名称：选项
 const avail_mode = {
