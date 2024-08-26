@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://b1qqdy5ewrrht"]
+
+[ext_resource type="Script" path="res://camera_set.gd" id="1_1jf2k"]
+[ext_resource type="PackedScene" uid="uid://behxnjt2rsrub" path="res://MainWithScore.tscn" id="2_t6gla"]
+
+[node name="CameraSet" type="Node2D"]
+script = ExtResource("1_1jf2k")
+
+[node name="MainWithScore" parent="." instance=ExtResource("2_t6gla")]
+
+[node name="MainWindow" type="TextureRect" parent="."]

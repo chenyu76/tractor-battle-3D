@@ -2,6 +2,8 @@ extends Node3D
 
 # 玩家数量信息，会从main.gd里同步
 var player_num = 0
+# 已经死的玩家id列表
+var die_players = []
 
 # 每个玩家的得分，需要初始化为零
 var score = []
@@ -11,6 +13,10 @@ var score_label = []
 # 游戏主场景
 @export var main_scene: PackedScene
 var Main
+
+# 重启时的信号
+signal restart_game()
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	# 实例化main场景
@@ -41,6 +47,7 @@ func _ready():
 		add_child(score_text)
 		
 		add_child(score_label[i])
+		
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -51,19 +58,29 @@ func _on_main_restart(id):
 	# 重置场景
 	Main.queue_free()
 	start_main_scene()
-	update_score(id)
+	#update_score(id)
+	
+	# 发送重启游戏信号	
+	restart_game.emit()
 	
 func start_main_scene():
 	Main = main_scene.instantiate()
 	player_num = Main.player_num
+	die_players = []
 	add_child(Main)
 	Main.restart.connect(_on_main_restart.bind())
+	for i in range(player_num):
+		Main.snakes[i].hit.connect(update_score.bind())
+	#Main.get_node("SubViewport/Camera").current = true
 	
 # 输入败者id,更新其他蛇id的计分板上的分数，各加一
-func update_score(id):
-	print("Update score")
-	for i in range(player_num):
-		if i != id:
-			score[i] += 1
-			score_label[i].mesh.text = str(score[i])
-			print("\tplayer "+str(i) + " score: " + str(score[i]))
+func update_score(id, _pos=Vector3.ZERO):
+	#print("Update score")
+	#游戏没结束才能加分
+	if player_num - len(die_players) > 1:
+		die_players.push_back(id)
+		for i in range(player_num):
+			if i != id and (i not in die_players):
+				score[i] += 1
+				score_label[i].mesh.text = str(score[i])
+				print("\tplayer "+str(i) + " score: " + str(score[i]))

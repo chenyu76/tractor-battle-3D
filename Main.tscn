@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://bxs0v4uv701sj" path="res://snake_head.tscn" id="2_sxenw"]
 [ext_resource type="PackedScene" uid="uid://vfkl8fhiyuha" path="res://snake_status.tscn" id="3_8pgk1"]
 [ext_resource type="ArrayMesh" uid="uid://dpl1p0qgo4pd0" path="res://art/you_lose.obj" id="4_nm8mx"]
+[ext_resource type="AudioStream" uid="uid://cnxlo0igc03xg" path="res://art/gameover.wav" id="6_su4kg"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_jyof0"]
 size = Vector3(60, 1, 60)
@@ -19,10 +20,7 @@ albedo_color = Color(0, 0, 0, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_8n0hv"]
 material = SubResource("StandardMaterial3D_ilmhb")
-size = Vector3(200, 1, 150)
-
-[sub_resource type="TextMesh" id="TextMesh_mxi6p"]
-text = "0"
+size = Vector3(400, 1, 300)
 
 [node name="Main" type="Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
@@ -43,11 +41,13 @@ transform = Transform3D(1, 0, 0, 0, -0.0485709, 0.99882, 0, -0.99882, -0.0485709
 shadow_enabled = true
 directional_shadow_max_distance = 250.0
 
-[node name="Marker3D" type="Marker3D" parent="."]
+[node name="CamPos" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.139173, 0.990268, 0, -0.990268, 0.139173, 0, 127, 19.105)
 
-[node name="Camera" type="Camera3D" parent="Marker3D"]
-transform = Transform3D(1, 0, 0, 0, 1, -5.96046e-08, 0, 5.96046e-08, 1, 0, 0, 0)
+[node name="SubViewport" type="SubViewport" parent="."]
+
+[node name="Camera" type="Camera3D" parent="SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 0.139173, 0.990268, 0, -0.990268, 0.139173, 0, 126.5, 19.105)
 fov = 27.0
 size = 20.0
 
@@ -67,10 +67,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.714785, 0)
 mesh = ExtResource("4_nm8mx")
 skeleton = NodePath("../..")
 
-[node name="loseMusic" type="AudioStreamPlayer" parent="."]
-
-[node name="test" type="MeshInstance3D" parent="."]
-mesh = SubResource("TextMesh_mxi6p")
-skeleton = NodePath("../Ground/MeshInstance3D")
+[node name="dieSoundPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_su4kg")
 
 [connection signal="timeout" from="loseAniTimer" to="." method="_on_lose_ani_timer_timeout"]
