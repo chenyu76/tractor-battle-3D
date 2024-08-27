@@ -25,7 +25,8 @@ const avail_mode = {
 	"fpv mode": "fpv",
 	"left & right": "lnr",
 	"no jump": "noj",
-	"on the moon": "otm"
+	"on the moon": "otm",
+	"speed up": "spd"
 }
 # 可用的键位配置
 const avail_keyset = {

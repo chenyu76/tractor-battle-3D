@@ -118,13 +118,16 @@ func initialize(id_t,
 	if 'fly' in extra_mode:
 		fly_mode = true
 		fall_acceleration = 0
-		velocity = Vector3(0, 0, speed)
+		velocity = Vector3(0, 0, -speed)
 	else:
 		fall_acceleration = default_fall_acceleration
 	if 'lnr' in extra_mode:
 		lnr_mode = true
 	if 'noj' in extra_mode:
 		no_jump = true
+	if 'spd' in extra_mode:
+		speed = 40
+		
 func _physics_process(delta):	
 	if position.y <= -10:
 		die()
@@ -288,7 +291,7 @@ func _on_speed_up_timer_timeout():
 
 func fly_mode_process(delta):
 	# 离远了会掉血
-	power -= max(position.x + position.y + position.z - 80, 0) * delta
+	power -= max(abs(position.x) + abs(position.y) + abs(position.z) - 80, 0) * delta
 	var direction = velocity
 	# 0 1 2 3
 	# 上下左右

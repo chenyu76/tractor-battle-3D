@@ -33,6 +33,8 @@ func restart():
 	bind_camera()
 	rechange_view()
 	_on_window_size_changed()
+	# 让关闭按钮置顶
+	move_child($EscButton, -1)
 	
 func rechange_view():
 	# 检查是否需要第一人称视角
@@ -52,7 +54,7 @@ func _process(delta: float) -> void:
 # 把相机连接到矩形
 func bind_camera():
 	if fpv_mode:
-		for i in range(player_num):
+		for i in range(len(players_cam)):
 			players_cam[i].texture = $MainWithScore.Main.snakes[i].get_node("SubViewport").get_texture()
 	# 修改材质为相机画面
 	$MainWindow.texture = $MainWithScore.Main.get_node("SubViewport").get_texture()
@@ -81,3 +83,7 @@ func _on_window_size_changed():
 	
 		# 调整相机分辨率
 		$MainWithScore.Main.get_node("SubViewport").set_size(new_window_size)
+
+
+func _on_esc_button_button_down() -> void:
+	get_tree().change_scene_to_file("res://start.tscn")
