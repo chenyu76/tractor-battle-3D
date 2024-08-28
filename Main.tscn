@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://ceqkw2hoc4w88"]
+[gd_scene load_steps=10 format=3 uid="uid://ceqkw2hoc4w88"]
 
 [ext_resource type="Script" path="res://Main.gd" id="1_3wfpj"]
 [ext_resource type="PackedScene" uid="uid://bxs0v4uv701sj" path="res://snake_head.tscn" id="2_sxenw"]
@@ -6,14 +6,9 @@
 [ext_resource type="ArrayMesh" uid="uid://dpl1p0qgo4pd0" path="res://art/you_lose.obj" id="4_nm8mx"]
 [ext_resource type="AudioStream" uid="uid://cnxlo0igc03xg" path="res://art/gameover.wav" id="6_su4kg"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_jyof0"]
-size = Vector3(60, 1, 60)
+[sub_resource type="BoxShape3D" id="BoxShape3D_f1vbc"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iyjse"]
-
-[sub_resource type="BoxMesh" id="BoxMesh_mmdct"]
-material = SubResource("StandardMaterial3D_iyjse")
-size = Vector3(60, 1, 60)
+[sub_resource type="BoxMesh" id="BoxMesh_2suad"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ilmhb"]
 albedo_color = Color(0, 0, 0, 1)
@@ -31,10 +26,10 @@ snake_status_scene = ExtResource("3_8pgk1")
 [node name="Ground" type="StaticBody3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
-shape = SubResource("BoxShape3D_jyof0")
+shape = SubResource("BoxShape3D_f1vbc")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
-mesh = SubResource("BoxMesh_mmdct")
+mesh = SubResource("BoxMesh_2suad")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -0.0485709, 0.99882, 0, -0.99882, -0.0485709, 0, 25.7317, 0)

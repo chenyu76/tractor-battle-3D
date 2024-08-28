@@ -1,15 +1,16 @@
 extends Node2D
 
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	# 重置设置
+	Config.reset_config()
 	
 	get_window().size_changed.connect(_on_window_size_changed.bind())
 	_on_window_size_changed()
 	
 	# 切换额外模式的按钮配置
-	var container = $Container/eModeContainer  # 确保你已经创建了一个 VBoxContainer 节点来容纳按钮
+	var container = $ScrollContainer/VBoxContainer/eModeContainer  # 确保你已经创建了一个 VBoxContainer 节点来容纳按钮
 	for button_name in Config.avail_mode.keys():
 		var button = Button.new()
 		button.text = button_name
@@ -54,17 +55,18 @@ func _on_plus_button_down() -> void:
 	renewPlayerNum(Config.player_num)
 func renewPlayerNum(n):
 	Config.key_sets.resize(n)
-	$Container/playerNumContainer/Label.text = var_to_str(n)
+	$ScrollContainer/VBoxContainer/playerNumContainer/Label.text = var_to_str(n)
 	playerKeyset(n)
 
 func _on_window_size_changed():
 	var sz = get_window().size
-	$Container.set_size(Vector2(sz.x / 10, sz.y))
-	$Container.position = Vector2(sz.x / 2 - sz.x / 10, 0)
+	$ScrollContainer.set_size(Vector2(sz.x / 3, sz.y))
+	$ScrollContainer/VBoxContainer.size.x = sz.x / 3
+	$ScrollContainer.position = Vector2(sz.x / 2 - sz.x / 6, 0)
 
 # 创建一个修改玩家键位的控件
 func playerKeyset(num):
-	var keyCtrl = $Container/playerKeyContainer
+	var keyCtrl = $ScrollContainer/VBoxContainer/playerKeyContainer
 	for child in keyCtrl.get_children():
 		keyCtrl.remove_child(child)
 	var keys_array = Config.avail_keyset.values()
@@ -91,10 +93,10 @@ func playerKeyset(num):
 
 func _on_random_mode_button_toggled(toggled_on: bool) -> void:
 	if toggled_on:
-		$Container/ModeSelctLabel.visible = false
-		$Container/eModeContainer.visible = false
+		$ScrollContainer/VBoxContainer/ModeSelctLabel.visible = false
+		$ScrollContainer/VBoxContainer/eModeContainer.visible = false
 		Config.random_extra_mode = true
 	else:
-		$Container/ModeSelctLabel.visible = true
-		$Container/eModeContainer.visible = true
+		$ScrollContainer/VBoxContainer/ModeSelctLabel.visible = true
+		$ScrollContainer/VBoxContainer/eModeContainer.visible = true
 		Config.random_extra_mode = false

@@ -33,8 +33,12 @@ var key_sets = Config.key_sets
 # 额外的模式
 var extra_mode = Config.extra_mode
 
-var snake_positions = build_snake_position(player_num)
-var status_positions = build_snake_status_position(player_num)
+# 蛇的初始位置和状态栏的位置
+var snake_positions
+var status_positions
+
+# 地图大小
+var map_size = 60
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -68,6 +72,12 @@ func _physics_process(delta):
 
 # 将蛇节点添加到子节点，开始游戏
 func start_game():
+	if 'mini_map' in Config.extra_mode:
+		map_size /= 2
+	
+	snake_positions = build_snake_position(player_num)
+	status_positions = build_snake_status_position(player_num)
+		
 	player_die = 0
 	for i in range(player_num):
 		snakes[i].position = snake_positions[i]
@@ -80,7 +90,25 @@ func start_game():
 		#if i == 0:
 		snakes[i].update_power_info.connect(infos[i].show_power.bind())
 		snakes[i].hit.connect(snake_die.bind())
-		
+	
+	# 地图
+	var mesh
+	var shape
+	if 'circular' in Config.extra_mode:
+		mesh = CylinderMesh.new()
+		shape = CylinderShape3D.new()
+		mesh.top_radius = map_size / 2
+		mesh.bottom_radius = map_size / 2
+		mesh.height = 1
+		shape.radius = map_size / 2
+		shape.height = 1
+	else:
+		mesh = BoxMesh.new()
+		shape = BoxShape3D.new()
+		mesh.size = Vector3(map_size, 1, map_size)
+		shape.size = Vector3(map_size, 1, map_size)
+	$Ground/CollisionShape3D.shape = shape
+	$Ground/MeshInstance3D.mesh = mesh
 
 # 蛇死亡
 func snake_die(id, snake_position):
@@ -106,9 +134,8 @@ func snake_die(id, snake_position):
 func build_snake_position(num):
 	var array = []
 	array.resize(num)
-	var map_length = 60
 	for i in range(num):
-		array[i] = Vector3(map_length / (num + 1.0) * (i+1) - map_length / 2.0, 2, 0)
+		array[i] = Vector3(map_size / (num + 1.0) * (i+1) - map_size / 2.0, 2, 0)
 	return array
 	
 # 输入snake数量，返回每个snake的状态栏应该放哪的vector3 array

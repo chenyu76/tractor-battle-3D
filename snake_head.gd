@@ -70,6 +70,7 @@ var power_generate_speed = default_power_generate_speed
 # 使用飞行模式
 var fly_mode = false
 # 与速度垂直，指向上方的向量，用于在飞行模式中判断方向
+# 也可以作为Vector3.UP使用，这样在飞行模式时可兼容其他模式
 var velocity_above = Vector3.UP
 # 飞行模式的旋转速度
 var fly_rotation_speed = 3
@@ -80,9 +81,23 @@ var lnr_mode = false
 # 禁止跳跃
 var no_jump = false
 
-# 第一人称视角
-# 发送自己的SubViewport 的 Camera path 和 id ， fpv会接收并显示出来
-#signal head_camera_id(path, id)
+# 像蛇一样的摆动模式
+var _snake_process = func(): pass
+
+# 冷兵器模式： 按功能键摆动武器 的函数
+var _cold_weapons_process = func(_d): pass
+
+# 顺滑的旋转 模式
+# 使用旋转速度的和飞行模式的旋转速度相同 fly_rotation_speed
+# 使用的加速机制和 lnr 相同
+var smooth_rotate_mode = false
+
+# 上次记录的位置，用于控制创建碰撞箱的时机，离远了就创建
+var last_position
+
+# 汽车模式 按键才移动
+var _car_mode_process = func(_d): pass
+var car_mode_acceleration = 2
 
 func _ready():
 	curve_path = Curve3D.new()
@@ -113,6 +128,9 @@ func initialize(id_t,
 	#$generateBodyTimer.start()
 	$input_interval.wait_time = 1.0 / speed
 	
+	# 初始化上次的位置
+	last_position = position
+	
 	# 处理其他玩法
 	# 飞行模式
 	if 'fly' in extra_mode:
@@ -127,7 +145,40 @@ func initialize(id_t,
 		no_jump = true
 	if 'spd' in extra_mode:
 		speed = 40
-		
+	if 'snk' in extra_mode:
+		_snake_process = func(): 
+			velocity = velocity.rotated(velocity_above, sin(Time.get_ticks_msec() / 50.0) / 2.0)
+	if 'cold_weapons' in extra_mode:
+		$pivot/sword.visible = true
+		$pivot/sword/CollisionShape3D.disabled = false
+		for i in range(0,7):
+			$pivot/sword/MeshInstance3D.set_surface_override_material(i, snake_material)
+		_cold_weapons_process = func(d): 
+			if Input.is_action_pressed(key_set[4]):
+				$pivot/sword.rotation += Vector3(0, sin(Time.get_ticks_msec() / 50.0) / 3.5, 0)
+				power -= d * 3
+			else:
+				$pivot/sword.rotation = Vector3.ZERO
+	else:
+		$pivot/sword.visible = false
+		$pivot/sword/CollisionShape3D.disabled = true
+	if 'smooth_rotate' in extra_mode:
+		smooth_rotate_mode = true
+		lnr_mode = true
+	if 'car' in extra_mode:
+		_car_mode_process = func(delta):
+			if (func():
+				for i in range(5):
+					if Input.is_action_pressed(key_set[i]):
+						return true
+				return false  # 有任意按键按下返回 true，否则返回false
+				).call():
+				if speed_multiplier <= 1.5:
+					speed_multiplier += delta * car_mode_acceleration
+			else:
+				if speed_multiplier > delta * car_mode_acceleration:
+					speed_multiplier -= delta * car_mode_acceleration
+	
 func _physics_process(delta):	
 	if position.y <= -10:
 		die()
@@ -136,18 +187,24 @@ func _physics_process(delta):
 		
 	# 更新相机位置（因为subviwport无法移动）
 	$SubViewport/Camera3D.global_transform = $pivot/CamPos.global_transform
-		
 	
 	# 根据使用模式的不同使用不同的变向策略
 	if fly_mode:
 		fly_mode_process(delta)
 	else:
 		normal_mode_process(delta)
-		
+	
+	# 处理奇怪模式的函数调用
+	_snake_process.call()
+	_cold_weapons_process.call(delta)
+	_car_mode_process.call(delta)
+	
 	move_and_slide()
 	
-	# 创建新的身体碰撞箱
-	generate_body()
+	# 当离碰撞箱远了，创建新的身体碰撞箱
+	if Abs(position - last_position) > 0.6:
+		generate_body()
+		last_position = position
 	
 	# 可能需要调整点的数量或对路径进行平滑处理以保持性能和视觉效果
 	# 创建新的蛇身点
@@ -164,9 +221,10 @@ func generate_body():
 	body.position = self.position
 	#mob.squashed.connect($UserInterface/ScoreLabel._on_mob_squashed.bind())
 	hit.connect(body._on_snake_head_hit.bind())
-	await get_tree().create_timer(1.5 / speed).timeout
 	
-	add_sibling(body)
+	if Abs(velocity) > 0.01: # 防止除0
+		await get_tree().create_timer(1.5 / Abs(velocity)).timeout
+		add_sibling(body)
 
 
 func _on_input_interval_timeout():
@@ -317,14 +375,20 @@ func fly_mode_process(delta):
 			fs *= -1
 		direction = direction.rotated(Vector3.UP, fs)
 		velocity_above = velocity_above.rotated(Vector3.UP, fs)
-	if direction != velocity:
-
-		velocity = direction.normalized() * speed
-		now_direction = direction.normalized()
-		head_direction = direction.normalized()
-		
-		$pivot.look_at_from_position(position, position + head_direction, velocity_above)
-	#print(velocity)
+	
+	# 防止撞到什么东西速度更新了但指向上方的向量没更新
+	if velocity.dot(velocity_above) != 0:
+		var v = -velocity.cross(velocity_above).cross(velocity).normalized()
+		if v.dot(velocity_above) > 0:
+			velocity_above = v
+		else:
+			velocity_above = -v
+	
+	velocity = direction.normalized() * speed * speed_multiplier
+	now_direction = direction.normalized()
+	head_direction = direction.normalized()
+	
+	$pivot.look_at_from_position(position, position + head_direction, velocity_above)
 	
 func normal_mode_process(delta):
 	var direction = Vector3.ZERO
@@ -333,8 +397,18 @@ func normal_mode_process(delta):
 	target_velocity.z = 0
 	# 不是飞行模式，使用正常玩法
 	# 改变方向
-	if allow_key_input:
+	
+	# 左右旋转模式
+	if smooth_rotate_mode:
+		# 按下一直转 smooth_rotate_mode
+		if Input.is_action_pressed(key_set[2]):
+			now_direction = velocity.rotated(Vector3.UP, delta * fly_rotation_speed).normalized()
+		if Input.is_action_pressed(key_set[3]):
+			now_direction = velocity.rotated(Vector3.UP, -delta * fly_rotation_speed).normalized()
+
+	elif allow_key_input:
 		if not lnr_mode:
+			# 正常模式
 			if Input.is_action_pressed(key_set[0]):
 				direction.z -= 1
 			if Input.is_action_pressed(key_set[1]):
@@ -344,6 +418,7 @@ func normal_mode_process(delta):
 			if Input.is_action_pressed(key_set[3]):
 				direction.x += 1
 		else:
+			# 按下转 90 度 left and right
 			if Input.is_action_just_pressed(key_set[2]):
 				direction = velocity.rotated(Vector3.UP, PI/2)
 			if Input.is_action_just_pressed(key_set[3]):
@@ -382,11 +457,12 @@ func normal_mode_process(delta):
 			$speedUpTimer.start()
 			power -= power_needed_to_speed_up
 	else:
-		power -= power_needed_to_speed_up * delta * (speed_multiplier-1)
+		# 左右转的模式的加速
 		if Input.is_action_pressed(key_set[0]) and speed_multiplier <= 2:
 			speed_multiplier += 2*delta
-		if Input.is_action_pressed(key_set[1]) and speed_multiplier >= 0.85:
+		if Input.is_action_pressed(key_set[1]) and speed_multiplier >= 0.5:
 			speed_multiplier -= 2*delta
+		power -= max(power_needed_to_speed_up * delta * (speed_multiplier-1), 0)
 	# Ground Velocity
 	target_velocity.x = now_direction.x * speed * speed_multiplier
 	target_velocity.z = now_direction.z * speed * speed_multiplier
@@ -413,3 +489,7 @@ func normal_mode_process(delta):
 	head_direction = (2 * head_direction + now_direction).normalized()
 	$pivot.look_at_from_position(position, position + head_direction, Vector3.UP)
 	$pivot.rotation.x = rotation_x
+
+# 计算Vector3的绝对值（长度）
+func Abs(vec):
+	return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z)

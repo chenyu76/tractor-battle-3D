@@ -1,10 +1,14 @@
-[gd_scene load_steps=6 format=3 uid="uid://bxs0v4uv701sj"]
+[gd_scene load_steps=8 format=3 uid="uid://bxs0v4uv701sj"]
 
 [ext_resource type="Script" path="res://snake_head.gd" id="1_cj73a"]
 [ext_resource type="PackedScene" uid="uid://bffpm7mu2kwt5" path="res://snake_body.tscn" id="2_v7qtp"]
 [ext_resource type="ArrayMesh" uid="uid://kga8ujyjv8h2" path="res://art/tractor.obj" id="3_elsiu"]
+[ext_resource type="ArrayMesh" uid="uid://gayxe3x7osps" path="res://art/sword.obj" id="4_tpetg"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7ctnb"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yow6s"]
+size = Vector3(1.465, 1.435, 4.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_b7mrp"]
 size = Vector3(0.9, 0.5, 0.5)
@@ -31,6 +35,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.08321, 1.37538)
 transform = Transform3D(0.3, 0, 0, 0, 0.3, 0, 0, 0, 0.3, -0.095, -0.903587, 0.498579)
 mesh = ExtResource("3_elsiu")
 skeleton = NodePath("../..")
+
+[node name="sword" type="StaticBody3D" parent="pivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.265, -1.2)
+visible = false
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="pivot/sword"]
+transform = Transform3D(-0.4, 0, -3.49691e-08, 0, 0.4, 0, 3.49691e-08, 0, -0.4, 0, 0, -1.245)
+mesh = ExtResource("4_tpetg")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pivot/sword"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.72)
+shape = SubResource("BoxShape3D_yow6s")
+disabled = true
 
 [node name="collisionDetector" type="Area3D" parent="pivot"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.248, -0.522)
