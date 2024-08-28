@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://bxs0v4uv701sj"]
+[gd_scene load_steps=11 format=3 uid="uid://bxs0v4uv701sj"]
 
 [ext_resource type="Script" path="res://snake_head.gd" id="1_cj73a"]
 [ext_resource type="PackedScene" uid="uid://bffpm7mu2kwt5" path="res://snake_body.tscn" id="2_v7qtp"]
@@ -9,6 +9,20 @@
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yow6s"]
 size = Vector3(1.465, 1.435, 4.3)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_7nhc0"]
+height = 7.0
+radius = 4.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_o4kcr"]
+top_radius = 0.3
+bottom_radius = 0.3
+height = 9.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_n8hf3"]
+top_radius = 4.0
+bottom_radius = 4.0
+height = 7.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_b7mrp"]
 size = Vector3(0.9, 0.5, 0.5)
@@ -50,6 +64,24 @@ mesh = ExtResource("4_tpetg")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.72)
 shape = SubResource("BoxShape3D_yow6s")
 disabled = true
+
+[node name="hammer" type="StaticBody3D" parent="pivot"]
+transform = Transform3D(0.01, 0, 0, 0, -4.37114e-10, -0.01, 0, 0.01, -4.37114e-10, 0, 0, 0)
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pivot/hammer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -12.5)
+shape = SubResource("CylinderShape3D_7nhc0")
+disabled = true
+
+[node name="I" type="MeshInstance3D" parent="pivot/hammer"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -5.10625)
+mesh = SubResource("CylinderMesh_o4kcr")
+
+[node name="O" type="MeshInstance3D" parent="pivot/hammer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -12.5)
+mesh = SubResource("CylinderMesh_n8hf3")
 
 [node name="collisionDetector" type="Area3D" parent="pivot"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.248, -0.522)

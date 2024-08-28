@@ -22,6 +22,7 @@ var random_extra_mode
 # 可用的额外模式，名称：选项
 const avail_mode = {
 	"fly mode": "fly",
+	"6 direction": "6d",
 	"fpv mode": "fpv",
 	"left & right": "lnr",
 	"smooth rotate": "smooth_rotate",
@@ -32,7 +33,9 @@ const avail_mode = {
 	"snake": "snk",
 	"mini map": "mini_map",
 	"circular map": "circular",
-	"cold weapons": "cold_weapons"
+	"sword": "sword",
+	"hammer": "hammer",
+	"quick recharge": "quick_recharge"
 }
 # 可用的键位配置
 const avail_keyset = {

@@ -75,6 +75,9 @@ var velocity_above = Vector3.UP
 # 飞行模式的旋转速度
 var fly_rotation_speed = 3
 
+# 六方向模式，使用飞行模式的部分选项
+var d6_mode = false
+
 # 方向键的左右是旋转模式
 var lnr_mode = false
 
@@ -84,8 +87,11 @@ var no_jump = false
 # 像蛇一样的摆动模式
 var _snake_process = func(): pass
 
-# 冷兵器模式： 按功能键摆动武器 的函数
-var _cold_weapons_process = func(_d): pass
+# 剑模式： 按功能键摆动武器 的函数
+var _sword_process = func(_d): pass
+
+# 锤子模式： 按功能键锤下
+var _hammer_process = func(_d): pass
 
 # 顺滑的旋转 模式
 # 使用旋转速度的和飞行模式的旋转速度相同 fly_rotation_speed
@@ -112,6 +118,9 @@ func _ready():
 	
 	if 'otm' in Config.extra_mode:
 		fall_acceleration = default_fall_acceleration / 6.0
+	if 'quick_recharge' in Config.extra_mode:
+		default_power_generate_speed *= 5		
+		power_generate_speed = default_power_generate_speed
 
 func initialize(id_t, 
 		snake_material_t = load("res://art/snake_material_1.tres"), 
@@ -132,12 +141,15 @@ func initialize(id_t,
 	last_position = position
 	
 	# 处理其他玩法
+	if '6d' in extra_mode:
+		d6_mode = true
+		fly_mode = true
 	# 飞行模式
-	if 'fly' in extra_mode:
+	if 'fly' in extra_mode or fly_mode:
 		fly_mode = true
 		fall_acceleration = 0
 		velocity = Vector3(0, 0, -speed)
-	else:
+	else: 
 		fall_acceleration = default_fall_acceleration
 	if 'lnr' in extra_mode:
 		lnr_mode = true
@@ -148,20 +160,38 @@ func initialize(id_t,
 	if 'snk' in extra_mode:
 		_snake_process = func(): 
 			velocity = velocity.rotated(velocity_above, sin(Time.get_ticks_msec() / 50.0) / 2.0)
-	if 'cold_weapons' in extra_mode:
+	if 'sword' in extra_mode:
 		$pivot/sword.visible = true
 		$pivot/sword/CollisionShape3D.disabled = false
-		for i in range(0,7):
+		for i in range(0, 7):
 			$pivot/sword/MeshInstance3D.set_surface_override_material(i, snake_material)
-		_cold_weapons_process = func(d): 
+		_sword_process = func(d): 
 			if Input.is_action_pressed(key_set[4]):
-				$pivot/sword.rotation += Vector3(0, sin(Time.get_ticks_msec() / 50.0) / 3.5, 0)
+				$pivot/sword.rotation = Vector3(0, sin(Time.get_ticks_msec() / 50.0) , 0)
 				power -= d * 3
 			else:
 				$pivot/sword.rotation = Vector3.ZERO
 	else:
 		$pivot/sword.visible = false
 		$pivot/sword/CollisionShape3D.disabled = true
+	if 'hammer' in extra_mode:
+		$pivot/hammer.visible = true
+		$pivot/hammer/CollisionShape3D.disabled = false
+		for i in range(0, 7):
+			$pivot/hammer/I.set_surface_override_material(i, snake_material)
+			$pivot/hammer/O.set_surface_override_material(i, snake_material)
+		_hammer_process = func(d): 
+			if Input.is_action_pressed(key_set[4]):
+				if $pivot/hammer.rotation.x > 0:
+					$pivot/hammer.rotation -= Vector3(d * PI/2 * 3 * scale.x , 0, 0)
+					$pivot/hammer.scale += Vector3.ONE * d * 3 * scale.x 
+				power -= d * 25
+			else:
+				$pivot/hammer.rotation = Vector3(PI/2, 0, 0)
+				$pivot/hammer.scale = Vector3.ONE / 100
+	else:
+		$pivot/hammer.visible = false
+		$pivot/hammer/CollisionShape3D.disabled = true
 	if 'smooth_rotate' in extra_mode:
 		smooth_rotate_mode = true
 		lnr_mode = true
@@ -196,7 +226,8 @@ func _physics_process(delta):
 	
 	# 处理奇怪模式的函数调用
 	_snake_process.call()
-	_cold_weapons_process.call(delta)
+	_sword_process.call(delta)
+	_hammer_process.call(delta)
 	_car_mode_process.call(delta)
 	
 	move_and_slide()
@@ -271,7 +302,7 @@ func create_square_at_point(point_position: Vector3, direction: Vector3, size: f
 	#有加速时修改方向
 	if speed_multiplier > 1:
 		speed_up_ani_angle += PI / 10
-	var right = direction.cross(Vector3.UP.rotated(direction, speed_up_ani_angle)).normalized() * size
+	var right = direction.cross(velocity_above.rotated(direction, speed_up_ani_angle)).normalized() * size
 	var up = right.cross(direction).normalized() * size
 
 	# 计算正方形的四个顶点
@@ -354,27 +385,48 @@ func fly_mode_process(delta):
 	# 0 1 2 3
 	# 上下左右
 	var nor = velocity_above.cross(velocity).normalized()
-	var fs = delta * fly_rotation_speed
-
-	if Input.is_action_pressed(key_set[0]):
-		direction = direction.rotated(nor, fs)
-		velocity_above = velocity_above.rotated(nor, fs)
-	if Input.is_action_pressed(key_set[1]):
-		direction = direction.rotated(nor, -fs)
-		velocity_above = velocity_above.rotated(nor, -fs)
-	if Input.is_action_pressed(key_set[2]):
-		# 这是真正的旋转，但是没有第一人称视角会很奇怪
-		#direction = velocity.rotated(velocity_above, fs) 
-		if velocity_above.dot(Vector3.UP) >= 0:
-			fs *= -1
-		direction = direction.rotated(Vector3.UP, -fs)
-		velocity_above = velocity_above.rotated(Vector3.UP, -fs)
-	if Input.is_action_pressed(key_set[3]):
-		#direction = velocity.rotated(velocity_above, -fs)
-		if velocity_above.dot(Vector3.UP) >= 0:
-			fs *= -1
-		direction = direction.rotated(Vector3.UP, fs)
-		velocity_above = velocity_above.rotated(Vector3.UP, fs)
+	if d6_mode: # 6 direction mode
+		if Input.is_action_just_pressed(key_set[0]):
+			direction = - velocity_above
+			velocity_above = velocity.normalized()
+		if Input.is_action_just_pressed(key_set[1]):
+			direction = velocity_above
+			velocity_above = - velocity.normalized()
+		if Input.is_action_just_pressed(key_set[2]):
+			direction = nor
+		if Input.is_action_just_pressed(key_set[3]):
+			direction = - nor
+	else: # fly mode
+		var fs = delta * fly_rotation_speed
+		if Input.is_action_pressed(key_set[0]):
+			direction = direction.rotated(nor, fs)
+			velocity_above = velocity_above.rotated(nor, fs)
+		if Input.is_action_pressed(key_set[1]):
+			direction = direction.rotated(nor, -fs)
+			velocity_above = velocity_above.rotated(nor, -fs)
+		if Input.is_action_pressed(key_set[2]):
+			# 这是真正的旋转，但是没有第一人称视角会很奇怪
+			#direction = velocity.rotated(velocity_above, fs) 
+			if velocity_above.dot(Vector3.UP) >= 0:
+				fs *= -1
+			direction = direction.rotated(Vector3.UP, -fs)
+			velocity_above = velocity_above.rotated(Vector3.UP, -fs)
+		if Input.is_action_pressed(key_set[3]):
+			#direction = velocity.rotated(velocity_above, -fs)
+			if velocity_above.dot(Vector3.UP) >= 0:
+				fs *= -1
+			direction = direction.rotated(Vector3.UP, fs)
+			velocity_above = velocity_above.rotated(Vector3.UP, fs)
+	
+	velocity = direction.normalized() * speed * speed_multiplier
+	now_direction = direction.normalized()
+	head_direction = (2 * head_direction + now_direction).normalized()
+	
+	# 如果d6_mode有方向输入，创建几个平滑过渡 有bug，先不启用
+	if false and direction.dot(velocity) == 0 and speed_multiplier <= 1: 
+		var num = 5 # 过渡数量
+		for i in range(num):
+				build_snake_body( (direction * i + velocity * (num - 1 - i)).normalized() )
 	
 	# 防止撞到什么东西速度更新了但指向上方的向量没更新
 	if velocity.dot(velocity_above) != 0:
@@ -383,10 +435,6 @@ func fly_mode_process(delta):
 			velocity_above = v
 		else:
 			velocity_above = -v
-	
-	velocity = direction.normalized() * speed * speed_multiplier
-	now_direction = direction.normalized()
-	head_direction = direction.normalized()
 	
 	$pivot.look_at_from_position(position, position + head_direction, velocity_above)
 	
@@ -431,7 +479,7 @@ func normal_mode_process(delta):
 			direction = direction.normalized()
 			
 			# 在没有加速时，渲染几个身体外观，使过渡圆滑
-			if speed_multiplier == 1:
+			if speed_multiplier <= 1:
 				# 过渡数量
 				var num = 5
 				for i in range(num):
