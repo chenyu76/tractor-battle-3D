@@ -103,6 +103,7 @@ var last_position
 
 # 汽车模式 按键才移动
 var _car_mode_process = func(_d): pass
+var car_mode = false
 var car_mode_acceleration = 2
 
 func _ready():
@@ -196,6 +197,7 @@ func initialize(id_t,
 		smooth_rotate_mode = true
 		lnr_mode = true
 	if 'car' in extra_mode:
+		car_mode = true
 		_car_mode_process = func(delta):
 			if (func():
 				for i in range(5):
@@ -232,6 +234,10 @@ func _physics_process(delta):
 	
 	move_and_slide()
 	
+	# 如果不是car_mode 那撞停了就可以直接死了
+	if (not died) and (not car_mode) and (Abs(velocity) == 0):
+		die()
+
 	# 当离碰撞箱远了，创建新的身体碰撞箱
 	if Abs(position - last_position) > 0.6:
 		generate_body()
