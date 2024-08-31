@@ -1,7 +1,7 @@
 [gd_scene load_steps=12 format=3 uid="uid://bxs0v4uv701sj"]
 
 [ext_resource type="Script" path="res://snake_head.gd" id="1_cj73a"]
-[ext_resource type="PackedScene" uid="uid://bffpm7mu2kwt5" path="res://snake_body.tscn" id="2_v7qtp"]
+[ext_resource type="PackedScene" path="res://snake_body.tscn" id="2_v7qtp"]
 [ext_resource type="ArrayMesh" uid="uid://kga8ujyjv8h2" path="res://art/tractor.obj" id="3_elsiu"]
 [ext_resource type="ArrayMesh" uid="uid://gayxe3x7osps" path="res://art/sword.obj" id="4_tpetg"]
 
@@ -42,6 +42,10 @@ snake_body_scene = ExtResource("2_v7qtp")
 
 [node name="Camera3D" type="Camera3D" parent="SubViewport"]
 environment = SubResource("Environment_6cxyu")
+
+[node name="BodyContainer" type="StaticBody3D" parent="SubViewport"]
+collision_layer = 4
+collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_7ctnb")

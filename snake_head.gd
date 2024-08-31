@@ -10,8 +10,8 @@ var fall_acceleration = default_fall_acceleration
 
 @export var snake_body_scene: PackedScene
 
-# 蛇的长度
-var snake_length = 5000
+# 蛇的长度（尺寸），以每节碰撞箱为单位元
+var snake_size = 5000
 # 蛇的移动方向
 var now_direction = Vector3.FORWARD
 # 蛇的头朝向的方向，由于动画需要，head_direction不会渐变
@@ -164,8 +164,7 @@ func initialize(id_t,
 	if 'sword' in extra_mode:
 		$pivot/sword.visible = true
 		$pivot/sword/CollisionShape3D.disabled = false
-		for i in range(0, 7):
-			$pivot/sword/MeshInstance3D.set_surface_override_material(i, snake_material)
+		$pivot/sword/MeshInstance3D.set_surface_override_material(0, snake_material)
 		_sword_process = func(d): 
 			if Input.is_action_pressed(key_set[4]):
 				$pivot/sword.rotation = Vector3(0, sin(Time.get_ticks_msec() / 50.0) , 0)
@@ -178,9 +177,8 @@ func initialize(id_t,
 	if 'hammer' in extra_mode:
 		$pivot/hammer.visible = true
 		$pivot/hammer/CollisionShape3D.disabled = false
-		for i in range(0, 7):
-			$pivot/hammer/I.set_surface_override_material(i, snake_material)
-			$pivot/hammer/O.set_surface_override_material(i, snake_material)
+		$pivot/hammer/I.set_surface_override_material(0, snake_material)
+		$pivot/hammer/O.set_surface_override_material(0, snake_material)
 		_hammer_process = func(d): 
 			if Input.is_action_pressed(key_set[4]):
 				if $pivot/hammer.rotation.x > 0:
@@ -249,11 +247,24 @@ func _physics_process(delta):
 	build_snake_body((now_direction + Vector3(0, sin(rotation_x), 0)).normalized())
 	
 
-# 创建新的身体箱
+# 创建新的身体碰撞箱
 func generate_body():
+	if Abs(velocity) > 0.01: # 防止除0
+		var body = CollisionShape3D.new()
+		var shape = BoxShape3D.new()
+		body.disabled = true
+		shape.size = Vector3(1, 1, 0.5)
+		body.shape = shape
+		body.global_transform = self.global_transform
+		body.rotation = $pivot.rotation
+		$SubViewport/BodyContainer.add_child(body)
+		await get_tree().create_timer(1.5 / Abs(velocity)).timeout
+		body.disabled = false
+	
+	'''
 	#print("new body")
-	var body = snake_body_scene.instantiate()
-	body.initialize(id, now_direction, rotation_x, snake_length / float(speed))
+	body = snake_body_scene.instantiate()
+	body.initialize(id, now_direction, rotation_x, snake_size)
 	body.get_node("CollisionShape3D").disabled = true
 	body.position = self.position
 	#mob.squashed.connect($UserInterface/ScoreLabel._on_mob_squashed.bind())
@@ -262,7 +273,7 @@ func generate_body():
 	if Abs(velocity) > 0.01: # 防止除0
 		await get_tree().create_timer(1.5 / Abs(velocity)).timeout
 		add_sibling(body)
-
+	'''
 
 func _on_input_interval_timeout():
 	allow_key_input = true
