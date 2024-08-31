@@ -96,6 +96,7 @@ func start_game():
 	var shape
 	if 'circular' in Config.extra_mode:
 		mesh = CylinderMesh.new()
+		mesh.material = load("res://art/ground_material.tres")
 		shape = CylinderShape3D.new()
 		mesh.top_radius = map_size / 2
 		mesh.bottom_radius = map_size / 2
@@ -104,6 +105,7 @@ func start_game():
 		shape.height = 1
 	else:
 		mesh = BoxMesh.new()
+		mesh.material = load("res://art/ground_material.tres")
 		shape = BoxShape3D.new()
 		mesh.size = Vector3(map_size, 1, map_size)
 		shape.size = Vector3(map_size, 1, map_size)

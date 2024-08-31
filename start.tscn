@@ -1,6 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://bouyodfkcwtp"]
+[gd_scene load_steps=6 format=3 uid="uid://bouyodfkcwtp"]
 
 [ext_resource type="Script" path="res://start.gd" id="1_v5wud"]
+[ext_resource type="PackedScene" uid="uid://dke6gsxx8gshr" path="res://start_background.tscn" id="2_s8wv7"]
+[ext_resource type="Theme" uid="uid://dfu8mfqk3qmg5" path="res://art/control_theme.tres" id="3_j1ed5"]
 
 [sub_resource type="InputEventAction" id="InputEventAction_rqh6d"]
 action = &"r"
@@ -11,79 +13,112 @@ events = [SubResource("InputEventAction_rqh6d")]
 [node name="Start" type="Node2D"]
 script = ExtResource("1_v5wud")
 
-[node name="ColorRect" type="ColorRect" parent="."]
-offset_left = -688.0
-offset_top = -392.0
-offset_right = 8080.0
-offset_bottom = 4672.0
-color = Color(0, 0, 0, 1)
+[node name="StartBackground" parent="." instance=ExtResource("2_s8wv7")]
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 offset_right = 40.0
 offset_bottom = 40.0
-horizontal_scroll_mode = 0
+theme = ExtResource("3_j1ed5")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
-layout_mode = 2
-alignment = 1
-
-[node name="Label" type="Label" parent="ScrollContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
+[node name="Title" type="Label" parent="."]
+offset_left = -8.0
+offset_top = -104.0
+offset_right = 386.0
+offset_bottom = -37.0
+theme = ExtResource("3_j1ed5")
+theme_override_font_sizes/font_size = 48
 text = "Tractor Battle 3D"
 horizontal_alignment = 1
 
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+offset_right = 424.0
+offset_bottom = 480.0
+theme = ExtResource("3_j1ed5")
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("3_j1ed5")
+alignment = 1
+
+[node name="spacer" type="ColorRect" parent="ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme = ExtResource("3_j1ed5")
+color = Color(1, 1, 1, 0)
+
 [node name="Button" type="Button" parent="ScrollContainer/VBoxContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 shortcut = SubResource("Shortcut_5ucek")
 text = "
-Press here to start
+Start
 
 "
 
 [node name="playerNumSelectLabel" type="Label" parent="ScrollContainer/VBoxContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 text = "Number of players"
 
 [node name="playerNumContainer" type="HBoxContainer" parent="ScrollContainer/VBoxContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 alignment = 1
 
 [node name="minus" type="Button" parent="ScrollContainer/VBoxContainer/playerNumContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 text = "-"
 
 [node name="Label" type="Label" parent="ScrollContainer/VBoxContainer/playerNumContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 text = "2"
 
 [node name="plus" type="Button" parent="ScrollContainer/VBoxContainer/playerNumContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 text = "+"
 
 [node name="playerKeyChangeLabel" type="Label" parent="ScrollContainer/VBoxContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 text = "Change players' keyset"
 
 [node name="playerKeyContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 
 [node name="ModeSelctLabel" type="Label" parent="ScrollContainer/VBoxContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 text = "Extra mode"
 
 [node name="eModeContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 
 [node name="randContainer" type="HBoxContainer" parent="ScrollContainer/VBoxContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 
 [node name="randomModeLabel" type="Label" parent="ScrollContainer/VBoxContainer/randContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
 text = "Random extra mode"
 
 [node name="CheckButton" type="CheckButton" parent="ScrollContainer/VBoxContainer/randContainer"]
 layout_mode = 2
+theme = ExtResource("3_j1ed5")
+
+[node name="spacerLower" type="ColorRect" parent="ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme = ExtResource("3_j1ed5")
+color = Color(1, 1, 1, 0)
 
 [connection signal="pressed" from="ScrollContainer/VBoxContainer/Button" to="." method="_on_button_pressed"]
 [connection signal="button_down" from="ScrollContainer/VBoxContainer/playerNumContainer/minus" to="." method="_on_minus_button_down"]

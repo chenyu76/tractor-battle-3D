@@ -32,6 +32,9 @@ func _ready():
 	
 	# 提供切换键位选项
 	renewPlayerNum(2)
+	
+	# 设置背景
+	$Background.texture = $StartBackground.get_node("SubViewport").get_texture()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -60,9 +63,23 @@ func renewPlayerNum(n):
 
 func _on_window_size_changed():
 	var sz = get_window().size
-	$ScrollContainer.set_size(Vector2(sz.x / 3, sz.y))
+	$ScrollContainer.set_size(Vector2(sz.x / 7, sz.y))
 	$ScrollContainer/VBoxContainer.size.x = sz.x / 3
-	$ScrollContainer.position = Vector2(sz.x / 2 - sz.x / 6, 0)
+	$ScrollContainer.position = Vector2(sz.x * 0.7, 0)
+	
+	# 设置背景大小
+	$Background.position = Vector2.ZERO
+	$Background.size = sz
+	$StartBackground.get_node("SubViewport").size = sz
+	$StartBackground.calc_screen_edges()
+	
+	$ScrollContainer/VBoxContainer/spacer.custom_minimum_size.y = sz.y * 0.45
+	$ScrollContainer/VBoxContainer/spacerLower.custom_minimum_size.y = sz.y * 0.2
+	#$ScrollContainer/VBoxContainer/spacer.size = Vector2(10, sz.y * 0.3)
+	
+	# 设置标题
+	$Title.position = sz * 0.1
+	$Title["theme_override_font_sizes/font_size"] = sz.y / 10
 
 # 创建一个修改玩家键位的控件
 func playerKeyset(num):

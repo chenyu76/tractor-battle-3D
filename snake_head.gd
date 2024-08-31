@@ -8,7 +8,7 @@ extends CharacterBody3D
 @export var default_fall_acceleration = 20
 var fall_acceleration = default_fall_acceleration
 
-@export var snake_body_scene: PackedScene
+#@export var snake_body_scene: PackedScene
 
 # 蛇的长度（尺寸），以每节碰撞箱为单位元
 var snake_size = 5000
@@ -105,6 +105,12 @@ var last_position
 var _car_mode_process = func(_d): pass
 var car_mode = false
 var car_mode_acceleration = 2
+
+# 仅当可控制为true时可接收玩家操作
+var controllable = true
+
+# 是否创建碰撞箱
+var create_collision_boxes = true
 
 func _ready():
 	curve_path = Curve3D.new()
@@ -218,11 +224,12 @@ func _physics_process(delta):
 	# 更新相机位置（因为subviwport无法移动）
 	$SubViewport/Camera3D.global_transform = $pivot/CamPos.global_transform
 	
-	# 根据使用模式的不同使用不同的变向策略
-	if fly_mode:
-		fly_mode_process(delta)
-	else:
-		normal_mode_process(delta)
+	if controllable:
+		# 根据使用模式的不同使用不同的变向策略
+		if fly_mode:
+			fly_mode_process(delta)
+		else:
+			normal_mode_process(delta)
 	
 	# 处理奇怪模式的函数调用
 	_snake_process.call()
@@ -238,7 +245,8 @@ func _physics_process(delta):
 
 	# 当离碰撞箱远了，创建新的身体碰撞箱
 	if Abs(position - last_position) > 0.6:
-		generate_body()
+		if create_collision_boxes:
+			generate_body()
 		last_position = position
 	
 	# 可能需要调整点的数量或对路径进行平滑处理以保持性能和视觉效果
@@ -246,6 +254,10 @@ func _physics_process(delta):
 	# 创建新身体渲染
 	build_snake_body((now_direction + Vector3(0, sin(rotation_x), 0)).normalized())
 	
+
+# 删除所有的身体渲染
+func delete_snake_body():
+	get_parent().remove_child(mesh_instance)
 
 # 创建新的身体碰撞箱
 func generate_body():

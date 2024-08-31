@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3 uid="uid://dke6gsxx8gshr"]
+
+[ext_resource type="Script" path="res://start_background.gd" id="1_ba2fv"]
+[ext_resource type="PackedScene" uid="uid://bxs0v4uv701sj" path="res://snake_head.tscn" id="2_qml2u"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1rs5d"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_flklu"]
+material = SubResource("StandardMaterial3D_1rs5d")
+size = Vector3(100, 1, 100)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8nv17"]
+size = Vector3(100, 1, 100)
+
+[node name="StartBackground" type="Node3D"]
+script = ExtResource("1_ba2fv")
+snake_head_scene = ExtResource("2_qml2u")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="SubViewport"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 16, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+mesh = SubResource("BoxMesh_flklu")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_8nv17")
+
+[node name="GenerateTimer" type="Timer" parent="."]
+wait_time = 5.0
+autostart = true
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 29.0086, 0)
+
+[connection signal="timeout" from="GenerateTimer" to="." method="_on_generate_timer_timeout"]

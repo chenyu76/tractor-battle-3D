@@ -11,7 +11,10 @@
 [sub_resource type="BoxMesh" id="BoxMesh_2suad"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ilmhb"]
-albedo_color = Color(0, 0, 0, 1)
+albedo_color = Color(0.886262, 0.886261, 0.886262, 1)
+albedo_texture_msdf = true
+roughness = 0.0
+emission = Color(0.74978, 0.74978, 0.74978, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_8n0hv"]
 material = SubResource("StandardMaterial3D_ilmhb")

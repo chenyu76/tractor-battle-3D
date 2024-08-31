@@ -5,3 +5,4 @@
 [node name="MusicPlayer" type="AudioStreamPlayer"]
 stream = ExtResource("1_um8da")
 autoplay = true
+parameters/looping = true
