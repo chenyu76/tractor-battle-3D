@@ -270,7 +270,7 @@ func generate_body():
 		body.global_transform = self.global_transform
 		body.rotation = $pivot.rotation
 		$SubViewport/BodyContainer.add_child(body)
-		await get_tree().create_timer(1.5 / Abs(velocity)).timeout
+		await get_tree().create_timer(2 / Abs(velocity)).timeout
 		body.disabled = false
 	
 	'''
