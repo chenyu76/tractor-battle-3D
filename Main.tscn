@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://ceqkw2hoc4w88"]
+[gd_scene load_steps=11 format=3 uid="uid://ceqkw2hoc4w88"]
 
 [ext_resource type="Script" path="res://Main.gd" id="1_3wfpj"]
 [ext_resource type="PackedScene" uid="uid://bxs0v4uv701sj" path="res://snake_head.tscn" id="2_sxenw"]
 [ext_resource type="PackedScene" uid="uid://vfkl8fhiyuha" path="res://snake_status.tscn" id="3_8pgk1"]
+[ext_resource type="Material" uid="uid://e2dnp65c8mi4" path="res://art/deadly_ground_material.tres" id="4_iik1f"]
 [ext_resource type="ArrayMesh" uid="uid://dpl1p0qgo4pd0" path="res://art/you_lose.obj" id="4_nm8mx"]
 [ext_resource type="AudioStream" uid="uid://cnxlo0igc03xg" path="res://art/gameover.wav" id="6_su4kg"]
 
@@ -10,14 +11,12 @@
 
 [sub_resource type="BoxMesh" id="BoxMesh_2suad"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ilmhb"]
-albedo_color = Color(0.886262, 0.886261, 0.886262, 1)
-albedo_texture_msdf = true
-roughness = 0.0
-emission = Color(0.74978, 0.74978, 0.74978, 1)
+[sub_resource type="Environment" id="Environment_tmahd"]
+background_mode = 1
+background_color = Color(0.758191, 0.758192, 0.758191, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_8n0hv"]
-material = SubResource("StandardMaterial3D_ilmhb")
+material = ExtResource("4_iik1f")
 size = Vector3(400, 1, 300)
 
 [node name="Main" type="Node3D"]
@@ -46,11 +45,13 @@ transform = Transform3D(1, 0, 0, 0, 0.139173, 0.990268, 0, -0.990268, 0.139173, 
 
 [node name="Camera" type="Camera3D" parent="SubViewport"]
 transform = Transform3D(1, 0, 0, 0, 0.139173, 0.990268, 0, -0.990268, 0.139173, 0, 126.5, 19.105)
+environment = SubResource("Environment_tmahd")
 fov = 27.0
 size = 20.0
 
 [node name="bottomGround" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.88542, 0)
+visible = false
 mesh = SubResource("BoxMesh_8n0hv")
 skeleton = NodePath("")
 

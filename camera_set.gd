@@ -27,6 +27,8 @@ func _ready() -> void:
 	get_window().size_changed.connect(_on_window_size_changed.bind())
 	bind_camera()
 	_on_window_size_changed()
+	# 让关闭按钮置顶
+	move_child($EscButton, -1)
 	
 func restart():
 	fpv_mode = "fpv" in Config.extra_mode

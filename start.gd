@@ -78,8 +78,8 @@ func _on_window_size_changed():
 	#$ScrollContainer/VBoxContainer/spacer.size = Vector2(10, sz.y * 0.3)
 	
 	# 设置标题
-	$Title.position = sz * 0.1
-	$Title["theme_override_font_sizes/font_size"] = sz.y / 10
+	$Title.scale = sz.y / $Title.texture.get_size().y * Vector2.ONE / 13
+	$Title.position = sz * 0.1 + $Title.texture.get_size() * $Title.scale / 2
 
 # 创建一个修改玩家键位的控件
 func playerKeyset(num):

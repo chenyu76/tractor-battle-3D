@@ -212,7 +212,7 @@ func initialize(id_t,
 				if speed_multiplier <= 1.5:
 					speed_multiplier += delta * car_mode_acceleration
 			else:
-				if speed_multiplier > delta * car_mode_acceleration:
+				if speed_multiplier > delta * car_mode_acceleration + 1.0/speed:
 					speed_multiplier -= delta * car_mode_acceleration
 	
 func _physics_process(delta):	
@@ -240,7 +240,7 @@ func _physics_process(delta):
 	move_and_slide()
 	
 	# 如果不是car_mode 那撞停了就可以直接死了
-	if (not died) and (not car_mode) and (Abs(velocity) == 0):
+	if (not died) and (not car_mode) and (Abs(velocity) == 0)  :
 		die()
 
 	# 当离碰撞箱远了，创建新的身体碰撞箱
@@ -272,20 +272,6 @@ func generate_body():
 		$SubViewport/BodyContainer.add_child(body)
 		await get_tree().create_timer(2 / Abs(velocity)).timeout
 		body.disabled = false
-	
-	'''
-	#print("new body")
-	body = snake_body_scene.instantiate()
-	body.initialize(id, now_direction, rotation_x, snake_size)
-	body.get_node("CollisionShape3D").disabled = true
-	body.position = self.position
-	#mob.squashed.connect($UserInterface/ScoreLabel._on_mob_squashed.bind())
-	hit.connect(body._on_snake_head_hit.bind())
-	
-	if Abs(velocity) > 0.01: # 防止除0
-		await get_tree().create_timer(1.5 / Abs(velocity)).timeout
-		add_sibling(body)
-	'''
 
 func _on_input_interval_timeout():
 	allow_key_input = true
@@ -416,11 +402,13 @@ func fly_mode_process(delta):
 	var nor = velocity_above.cross(velocity).normalized()
 	if d6_mode: # 6 direction mode
 		if Input.is_action_just_pressed(key_set[0]):
+			var temp = direction
 			direction = - velocity_above
-			velocity_above = velocity.normalized()
+			velocity_above = temp.normalized()
 		if Input.is_action_just_pressed(key_set[1]):
+			var temp = direction
 			direction = velocity_above
-			velocity_above = - velocity.normalized()
+			velocity_above = - temp.normalized()
 		if Input.is_action_just_pressed(key_set[2]):
 			direction = nor
 		if Input.is_action_just_pressed(key_set[3]):

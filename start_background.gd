@@ -15,6 +15,9 @@ var order = 0
 # screen_vertex_position
 var svp = []
 
+# 距离上一次转向过了多久
+var since_last_rotation = 0
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	snakes.resize(snake_num)
@@ -49,7 +52,10 @@ func calc_screen_edges():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	_on_rotate_timer_timeout()
+	since_last_rotation += delta
+	if since_last_rotation > 0.05:
+		_on_rotate_timer_timeout()
+		since_last_rotation -= 0.05
 
 func generate_snake(index):
 	if snakes[index]: # 如何这条蛇已经存在，删除它
@@ -89,6 +95,7 @@ func generate_snake(index):
 	snakes[index].position = p
 	snakes[index].get_node("pivot").look_at_from_position(Vector3.ZERO, d)
 	snakes[index].controllable = false
+	snakes[index].create_collision_boxes = false
 	snakes[index].velocity = d * 20
 	snakes[index].now_direction = d # 渲染身体的方向是跟着now_direction走的
 	snakes[index].initialize(index, Config.sms[randi_range(0, len(Config.sms)-1)])

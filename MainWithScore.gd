@@ -88,7 +88,8 @@ func update_score(id, _pos=Vector3.ZERO):
 				print("\tplayer "+str(i) + " score: " + str(score[i]))
 
 func random_extra_mode():
-	var exnum = randi() % len(Config.avail_mode)
+	# 抽取的模式数量， 不宜太多
+	var exnum = int(1.0 / randi_range(0, len(Config.avail_mode) - 1))
 	var values_array = Config.avail_mode.values()
 	Config.extra_mode = []
 	while Config.extra_mode.size() < exnum:
