@@ -121,6 +121,8 @@ one_shot = true
 wait_time = 2.0
 one_shot = true
 
+[node name="teleportTimer" type="Timer" parent="."]
+
 [connection signal="body_entered" from="pivot/collisionDetector" to="." method="_on_collision_detector_body_entered"]
 [connection signal="screen_entered" from="pivot/VisibleOnScreenNotifier3D" to="." method="_on_visible_on_screen_notifier_3d_screen_entered"]
 [connection signal="screen_exited" from="pivot/VisibleOnScreenNotifier3D" to="." method="_on_visible_on_screen_notifier_3d_screen_exited"]

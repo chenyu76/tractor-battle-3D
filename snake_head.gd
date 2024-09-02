@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
-# 蛇的速度
+
+# 蛇的速度，一个标量
 @export var speed = 20
 # 蛇的跳跃高度
 @export var jump_impulse = 8
@@ -101,10 +102,16 @@ var smooth_rotate_mode = false
 # 上次记录的位置，用于控制创建碰撞箱的时机，离远了就创建
 var last_position
 
-# 汽车模式 按键才移动
+# 汽车模式 按键 按下 才移动
 var _car_mode_process = func(_d): pass
 var car_mode = false
 var car_mode_acceleration = 2
+
+# 向前瞬移模式，冲刺时无敌
+var _teleport_mode_process = func(_d): pass
+
+# 蛇的大小，会影响外观和碰撞箱，一个标量
+var snake_scale = 1
 
 # 仅当可控制为true时可接收玩家操作
 var controllable = true
@@ -113,6 +120,57 @@ var controllable = true
 var create_collision_boxes = true
 
 func _ready():
+	# 这里的玩法处理基本都是能在开始界面预览的
+	# 但是读取Config.extra_mode就不能单独每条蛇设置
+	if "small" in Config.extra_mode:
+		snake_scale = 0.5
+	if "large" in Config.extra_mode:
+		snake_scale = 2
+	if "huge" in Config.extra_mode:
+		snake_scale = 4
+	scale = Vector3.ONE * snake_scale
+	
+	if 'spd' in Config.extra_mode:
+		speed = 40
+	if 'snk' in Config.extra_mode:
+		_snake_process = func(): 
+			velocity = velocity.rotated(velocity_above, sin(Time.get_ticks_msec() / 50.0) / 2.0)
+	if 'sword' in Config.extra_mode:
+		$pivot/sword.visible = true
+		$pivot/sword/CollisionShape3D.disabled = false
+		$pivot/sword/MeshInstance3D.set_surface_override_material(0, snake_material)
+		_sword_process = func(d): 
+			if Input.is_action_pressed(key_set[4]):
+				$pivot/sword.rotation = Vector3(0, sin(Time.get_ticks_msec() / 50.0) , 0)
+				power -= d * 3
+			else:
+				$pivot/sword.rotation = Vector3.ZERO
+	else:
+		$pivot/sword.visible = false
+		$pivot/sword/CollisionShape3D.disabled = true
+	if 'hammer' in Config.extra_mode:
+		$pivot/hammer.visible = true
+		$pivot/hammer/CollisionShape3D.disabled = false
+		$pivot/hammer/I.set_surface_override_material(0, snake_material)
+		$pivot/hammer/O.set_surface_override_material(0, snake_material)
+		_hammer_process = func(d): 
+			if Input.is_action_pressed(key_set[4]):
+				if $pivot/hammer.rotation.x > 0:
+					$pivot/hammer.rotation -= Vector3(d * PI/2 * 3 * scale.x , 0, 0)
+					$pivot/hammer.scale += Vector3.ONE * d * 3 * scale.x 
+				power -= d * 25
+			else:
+				$pivot/hammer.rotation = Vector3(PI/2, 0, 0)
+				$pivot/hammer.scale = Vector3.ONE / 100
+	else:
+		$pivot/hammer.visible = false
+		$pivot/hammer/CollisionShape3D.disabled = true
+	if 'otm' in Config.extra_mode:
+		fall_acceleration = default_fall_acceleration / 6.0
+	if 'quick_recharge' in Config.extra_mode:
+		default_power_generate_speed *= 5		
+		power_generate_speed = default_power_generate_speed
+	
 	curve_path = Curve3D.new()
 	mesh_instance = MeshInstance3D.new()
 	add_sibling(mesh_instance)
@@ -120,14 +178,9 @@ func _ready():
 	curve_path.add_point(position)
 	curve_path.add_point(position)
 	var direction = head_direction + Vector3(0, sin(rotation_x), 0)
-	svp = create_square_at_point(curve_path.get_point_position(0), direction, 0.5) # 假定大小为0.5
-	sv = create_square_at_point(curve_path.get_point_position(1), direction, 0.5) # 假定大小为0.5
+	svp = create_square_at_point(curve_path.get_point_position(0), direction, snake_scale / 2.0)
+	sv = create_square_at_point(curve_path.get_point_position(1), direction, snake_scale / 2.0)
 	
-	if 'otm' in Config.extra_mode:
-		fall_acceleration = default_fall_acceleration / 6.0
-	if 'quick_recharge' in Config.extra_mode:
-		default_power_generate_speed *= 5		
-		power_generate_speed = default_power_generate_speed
 
 func initialize(id_t, 
 		snake_material_t = load("res://art/snake_material_1.tres"), 
@@ -148,7 +201,7 @@ func initialize(id_t,
 	last_position = position
 	
 	# 处理其他玩法
-	if '6d' in extra_mode:
+	if '6d' in Config.extra_mode:
 		d6_mode = true
 		fly_mode = true
 	# 飞行模式
@@ -162,41 +215,6 @@ func initialize(id_t,
 		lnr_mode = true
 	if 'noj' in extra_mode:
 		no_jump = true
-	if 'spd' in extra_mode:
-		speed = 40
-	if 'snk' in extra_mode:
-		_snake_process = func(): 
-			velocity = velocity.rotated(velocity_above, sin(Time.get_ticks_msec() / 50.0) / 2.0)
-	if 'sword' in extra_mode:
-		$pivot/sword.visible = true
-		$pivot/sword/CollisionShape3D.disabled = false
-		$pivot/sword/MeshInstance3D.set_surface_override_material(0, snake_material)
-		_sword_process = func(d): 
-			if Input.is_action_pressed(key_set[4]):
-				$pivot/sword.rotation = Vector3(0, sin(Time.get_ticks_msec() / 50.0) , 0)
-				power -= d * 3
-			else:
-				$pivot/sword.rotation = Vector3.ZERO
-	else:
-		$pivot/sword.visible = false
-		$pivot/sword/CollisionShape3D.disabled = true
-	if 'hammer' in extra_mode:
-		$pivot/hammer.visible = true
-		$pivot/hammer/CollisionShape3D.disabled = false
-		$pivot/hammer/I.set_surface_override_material(0, snake_material)
-		$pivot/hammer/O.set_surface_override_material(0, snake_material)
-		_hammer_process = func(d): 
-			if Input.is_action_pressed(key_set[4]):
-				if $pivot/hammer.rotation.x > 0:
-					$pivot/hammer.rotation -= Vector3(d * PI/2 * 3 * scale.x , 0, 0)
-					$pivot/hammer.scale += Vector3.ONE * d * 3 * scale.x 
-				power -= d * 25
-			else:
-				$pivot/hammer.rotation = Vector3(PI/2, 0, 0)
-				$pivot/hammer.scale = Vector3.ONE / 100
-	else:
-		$pivot/hammer.visible = false
-		$pivot/hammer/CollisionShape3D.disabled = true
 	if 'smooth_rotate' in extra_mode:
 		smooth_rotate_mode = true
 		lnr_mode = true
@@ -214,6 +232,21 @@ func initialize(id_t,
 			else:
 				if speed_multiplier > delta * car_mode_acceleration + 1.0/speed:
 					speed_multiplier -= delta * car_mode_acceleration
+	if 'teleport' in extra_mode:
+		_teleport_mode_process = func(delta):
+			if Input.is_action_just_pressed(key_set[4]) and power >= power_needed_to_jump:
+				power -= power_needed_to_jump
+				velocity *= 20
+				speed_up_ani_angle += PI
+				build_snake_body((now_direction + Vector3(0, sin(rotation_x), 0)).normalized())
+				$pivot/collisionDetector/CollisionShape3D.disabled = true
+				$CollisionShape3D.disabled = true
+				move_and_slide()
+				velocity /= 20
+				$pivot/collisionDetector/CollisionShape3D.disabled = false
+				$CollisionShape3D.disabled = false
+				speed_up_ani_angle += PI
+				build_snake_body((now_direction + Vector3(0, sin(rotation_x), 0)).normalized())
 	
 func _physics_process(delta):	
 	if position.y <= -10:
@@ -236,6 +269,8 @@ func _physics_process(delta):
 	_sword_process.call(delta)
 	_hammer_process.call(delta)
 	_car_mode_process.call(delta)
+	
+	_teleport_mode_process.call(delta)
 	
 	move_and_slide()
 	
@@ -270,7 +305,7 @@ func generate_body():
 		body.global_transform = self.global_transform
 		body.rotation = $pivot.rotation
 		$SubViewport/BodyContainer.add_child(body)
-		await get_tree().create_timer(2 / Abs(velocity)).timeout
+		await get_tree().create_timer(snake_scale * 2 / Abs(velocity)).timeout
 		body.disabled = false
 
 func _on_input_interval_timeout():
@@ -336,7 +371,7 @@ func build_snake_body(direction):
 	var i = curve_path.get_point_count() - 1
 	
 	svp = sv
-	sv = create_square_at_point(curve_path.get_point_position(i), direction, 0.5) # 假定大小为0.5
+	sv = create_square_at_point(curve_path.get_point_position(i), direction, snake_scale / 2.0)
 	
 	for j in range(4):
 		# 这里添加正方形顶点到SurfaceTool，并创建面

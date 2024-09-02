@@ -75,7 +75,7 @@ func start_game():
 	if 'mini_map' in Config.extra_mode:
 		map_size = Config.default_map_size / 2
 	elif 'large_map' in Config.extra_mode:
-		map_size = Config.default_map_size * 4
+		map_size = Config.default_map_size * 5 / 2
 	
 	# 地图
 	var mesh
