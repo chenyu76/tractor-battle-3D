@@ -38,7 +38,7 @@ var snake_positions
 var status_positions
 
 # 地图大小
-var map_size = 60
+var map_size = Config.default_map_size
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -73,7 +73,41 @@ func _physics_process(delta):
 # 将蛇节点添加到子节点，开始游戏
 func start_game():
 	if 'mini_map' in Config.extra_mode:
-		map_size /= 2
+		map_size = Config.default_map_size / 2
+	elif 'large_map' in Config.extra_mode:
+		map_size = Config.default_map_size * 4
+	
+	# 地图
+	var mesh
+	var shape
+	if 'circular' in Config.extra_mode:
+		mesh = CylinderMesh.new()
+		mesh.material = load("res://art/ground_material.tres")
+		shape = CylinderShape3D.new()
+		mesh.top_radius = map_size / 2
+		mesh.bottom_radius = map_size / 2
+		mesh.height = 1
+		shape.radius = map_size / 2
+		shape.height = 1
+	elif 'spherical' in Config.extra_mode:
+		mesh = SphereMesh.new()
+		mesh.material = load("res://art/ground_material.tres")
+		mesh.radius = map_size / 2
+		mesh.height = map_size
+		shape = SphereShape3D.new()
+		shape.radius = map_size / 2
+		$Ground.position.y += map_size / 3
+		$Ground/CollisionShape3D.position.y -= map_size / 2
+		$Ground/MeshInstance3D.position.y -= map_size / 2
+	else:
+		mesh = BoxMesh.new()
+		mesh.material = load("res://art/ground_material.tres")
+		shape = BoxShape3D.new()
+		mesh.size = Vector3(map_size, 1, map_size)
+		shape.size = Vector3(map_size, 1, map_size)
+	$Ground/CollisionShape3D.shape = shape
+	$Ground/MeshInstance3D.mesh = mesh
+	
 	
 	snake_positions = build_snake_position(player_num)
 	status_positions = build_snake_status_position(player_num)
@@ -91,26 +125,6 @@ func start_game():
 		snakes[i].update_power_info.connect(infos[i].show_power.bind())
 		snakes[i].hit.connect(snake_die.bind())
 	
-	# 地图
-	var mesh
-	var shape
-	if 'circular' in Config.extra_mode:
-		mesh = CylinderMesh.new()
-		mesh.material = load("res://art/ground_material.tres")
-		shape = CylinderShape3D.new()
-		mesh.top_radius = map_size / 2
-		mesh.bottom_radius = map_size / 2
-		mesh.height = 1
-		shape.radius = map_size / 2
-		shape.height = 1
-	else:
-		mesh = BoxMesh.new()
-		mesh.material = load("res://art/ground_material.tres")
-		shape = BoxShape3D.new()
-		mesh.size = Vector3(map_size, 1, map_size)
-		shape.size = Vector3(map_size, 1, map_size)
-	$Ground/CollisionShape3D.shape = shape
-	$Ground/MeshInstance3D.mesh = mesh
 
 # 蛇死亡
 func snake_die(id, snake_position):
@@ -137,7 +151,7 @@ func build_snake_position(num):
 	var array = []
 	array.resize(num)
 	for i in range(num):
-		array[i] = Vector3(map_size / (num + 1.0) * (i+1) - map_size / 2.0, 2, 0)
+		array[i] = Vector3(map_size / (num + 1.0) * (i+1) - map_size / 2.0, $Ground.position.y + 1, 0)
 	return array
 	
 # 输入snake数量，返回每个snake的状态栏应该放哪的vector3 array

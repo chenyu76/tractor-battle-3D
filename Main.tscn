@@ -7,9 +7,9 @@
 [ext_resource type="ArrayMesh" uid="uid://dpl1p0qgo4pd0" path="res://art/you_lose.obj" id="4_nm8mx"]
 [ext_resource type="AudioStream" uid="uid://cnxlo0igc03xg" path="res://art/gameover.wav" id="6_su4kg"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_f1vbc"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_ddglf"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_2suad"]
+[sub_resource type="BoxMesh" id="BoxMesh_t7rvu"]
 
 [sub_resource type="Environment" id="Environment_tmahd"]
 background_mode = 1
@@ -28,10 +28,10 @@ snake_status_scene = ExtResource("3_8pgk1")
 [node name="Ground" type="StaticBody3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
-shape = SubResource("BoxShape3D_f1vbc")
+shape = SubResource("BoxShape3D_ddglf")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
-mesh = SubResource("BoxMesh_2suad")
+mesh = SubResource("BoxMesh_t7rvu")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -0.0485709, 0.99882, 0, -0.99882, -0.0485709, 0, 25.7317, 0)

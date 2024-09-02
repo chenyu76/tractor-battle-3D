@@ -32,7 +32,9 @@ const avail_mode = {
 	"speed up": "spd",
 	"snake": "snk",
 	"mini map": "mini_map",
+	"large map": "large_map",
 	"circular map": "circular",
+	"spherical map": "spherical",
 	"sword": "sword",
 	"hammer": "hammer",
 	"quick recharge": "quick_recharge"
@@ -46,6 +48,10 @@ const avail_keyset = {
 	"Arrows+space": ["up1", "down1", "left1", "right1", "jump1"],
 	"Game controller": ["joyU", "joyD", "joyL", "joyR", "joyA"]
 	}
+	
+	
+# 默认地图大小
+const default_map_size = 60
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
